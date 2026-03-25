@@ -114,6 +114,52 @@ docker run --rm -p 8000:8000 --env-file .env m2n-backend
 
 For plain Docker, the database must already be reachable from the container using the configured env values.
 
+## Railway + Neon + Vercel (Production)
+
+Recommended architecture:
+
+- Backend: Railway
+- Database: Neon Postgres
+- Frontend: Vercel
+
+Railway service settings:
+
+- Repository format must be `owner/repo` (example: `MARCODEVLOPEMENT/serviciess`)
+- Branch: `main`
+- Root Directory: `/backend`
+- Service Name: `backend`
+
+Required Railway variables:
+
+```env
+DATABASE_URL=postgresql://<user>:<password>@<neon-host>/<db>?sslmode=require
+SECRET_KEY=<long-random-secret>
+ENVIRONMENT=production
+DEBUG=False
+APP_PORT=${{PORT}}
+LOG_LEVEL=INFO
+ALLOWED_ORIGINS=["https://<your-frontend>.vercel.app","https://<your-custom-domain>"]
+
+STORAGE_BACKEND=local
+LOCAL_STORAGE_ROOT=/app/uploads
+MAX_UPLOAD_SIZE_MB=10
+ALLOWED_DOCUMENT_MIME_TYPES=["application/pdf","image/png","image/jpeg","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
+ALLOWED_DOCUMENT_EXTENSIONS=[".pdf",".png",".jpg",".jpeg",".doc",".docx",".xls",".xlsx"]
+```
+
+Railway notes:
+
+- `railway.toml` is included with healthcheck path `/health/ready`.
+- Container startup runs `alembic upgrade head` automatically via entrypoint.
+- Entrypoint supports Railway's `PORT` env directly, with `APP_PORT` fallback.
+- If you need persistent uploaded files, attach a Railway volume at `/app/uploads`.
+
+Vercel frontend variable:
+
+```env
+VITE_API_BASE_URL=https://<your-railway-domain>
+```
+
 ## CI/CD and staging
 
 GitHub Actions workflows are included at the repo root:

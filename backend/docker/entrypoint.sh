@@ -15,5 +15,6 @@ do
   sleep 3
 done
 
-echo "Starting FastAPI on port ${APP_PORT:-8000}..."
-exec uvicorn main:app --host 0.0.0.0 --port "${APP_PORT:-8000}"
+RUNTIME_PORT="${PORT:-${APP_PORT:-8000}}"
+echo "Starting FastAPI on port ${RUNTIME_PORT}..."
+exec uvicorn main:app --host 0.0.0.0 --port "${RUNTIME_PORT}"
