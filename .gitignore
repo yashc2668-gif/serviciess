@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+venv/
+backend/venv/
+.venv/
+
+# Environment files
+.env
+backend/.env
+backend/.env.staging
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/m2n_dev.db
+
+# Uploads and logs
+uploads/
+backend/uploads/
+logs/
+backend/logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

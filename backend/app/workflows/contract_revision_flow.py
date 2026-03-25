@@ -1,0 +1,1 @@
+"""Contract revision workflow placeholder."""
