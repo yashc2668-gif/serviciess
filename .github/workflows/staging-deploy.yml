@@ -13,6 +13,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: staging
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,9 +28,17 @@ jobs:
       - name: Add staging host to known hosts
         run: ssh-keyscan -H "${{ secrets.STAGING_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Ensure staging target directory exists
+        run: |
+          ssh "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" "mkdir -p '${{ secrets.STAGING_TARGET_DIR }}/backend'"
+
       - name: Sync backend to staging host
         run: |
-          rsync -az --delete backend/ "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_TARGET_DIR }}/backend/"
+          rsync -az --delete \
+            --filter='P .env.staging' \
+            --filter='P uploads/' \
+            --filter='P logs/' \
+            backend/ "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_TARGET_DIR }}/backend/"
 
       - name: Deploy staging stack
         run: |
