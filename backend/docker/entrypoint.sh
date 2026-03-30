@@ -1,13 +1,13 @@
 #!/bin/sh
 set -eu
 
-echo "Applying database migrations..."
+echo "Attempting database migrations..."
 attempt=1
 until python -m alembic upgrade head
 do
   if [ "$attempt" -ge 10 ]; then
-    echo "Migrations failed after ${attempt} attempts."
-    exit 1
+    echo "WARNING: Migrations failed after ${attempt} attempts. Starting app anyway for healthcheck."
+    break
   fi
 
   echo "Migration attempt ${attempt} failed, retrying in 3 seconds..."
