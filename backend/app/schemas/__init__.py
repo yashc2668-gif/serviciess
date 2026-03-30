@@ -52,7 +52,77 @@ from app.schemas.payment import (  # noqa
     OutstandingBillOut,
     PaymentOut,
 )
-from app.schemas.inventory import InventoryItemCreate, InventoryItemUpdate, InventoryItemOut  # noqa
+from app.schemas.inventory import (  # noqa
+    InventoryItemCreate,
+    InventoryItemOut,
+    InventoryItemUpdate,
+    InventoryTransactionOut,
+)
+from app.schemas.labour import LabourCreate, LabourOut, LabourUpdate  # noqa
+from app.schemas.labour_advance import (  # noqa
+    LabourAdvanceCreate,
+    LabourAdvanceOut,
+    LabourAdvanceRecoveryCreate,
+    LabourAdvanceRecoveryOut,
+    LabourAdvanceUpdate,
+)
+from app.schemas.labour_attendance import (  # noqa
+    LabourAttendanceCreate,
+    LabourAttendanceItemCreate,
+    LabourAttendanceItemOut,
+    LabourAttendanceItemUpdate,
+    LabourAttendanceOut,
+    LabourAttendanceUpdate,
+)
+from app.schemas.labour_bill import LabourBillCreate, LabourBillOut, LabourBillUpdate  # noqa
+from app.schemas.labour_contractor import (  # noqa
+    LabourContractorCreate,
+    LabourContractorOut,
+    LabourContractorUpdate,
+)
+from app.schemas.labour_productivity import (  # noqa
+    LabourProductivityCreate,
+    LabourProductivityOut,
+    LabourProductivityUpdate,
+)
+from app.schemas.material import (  # noqa
+    MaterialCreate,
+    MaterialOut,
+    MaterialStockSummaryOut,
+    MaterialUpdate,
+)
+from app.schemas.material_issue import (  # noqa
+    MaterialIssueCreate,
+    MaterialIssueItemCreate,
+    MaterialIssueItemOut,
+    MaterialIssueItemUpdate,
+    MaterialIssueOut,
+    MaterialIssueUpdate,
+)
+from app.schemas.material_requisition import (  # noqa
+    MaterialRequisitionCreate,
+    MaterialRequisitionItemCreate,
+    MaterialRequisitionItemOut,
+    MaterialRequisitionItemUpdate,
+    MaterialRequisitionOut,
+    MaterialRequisitionUpdate,
+)
+from app.schemas.material_receipt import (  # noqa
+    MaterialReceiptCreate,
+    MaterialReceiptItemCreate,
+    MaterialReceiptItemOut,
+    MaterialReceiptItemUpdate,
+    MaterialReceiptOut,
+    MaterialReceiptUpdate,
+)
+from app.schemas.material_stock_adjustment import (  # noqa
+    MaterialStockAdjustmentCreate,
+    MaterialStockAdjustmentItemCreate,
+    MaterialStockAdjustmentItemOut,
+    MaterialStockAdjustmentItemUpdate,
+    MaterialStockAdjustmentOut,
+    MaterialStockAdjustmentUpdate,
+)
 from app.schemas.document import (  # noqa
     DocumentCreate,
     DocumentOut,

@@ -34,8 +34,8 @@ def upgrade() -> None:
     sa.Column('submitted_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('approved_by', sa.Integer(), nullable=True),
     sa.Column('approved_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['approved_by'], ['users.id'], ),
     sa.ForeignKeyConstraint(['contract_id'], ['contracts.id'], ),
     sa.ForeignKeyConstraint(['submitted_by'], ['users.id'], ),
@@ -52,7 +52,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=300), nullable=True),
     sa.Column('percentage', sa.Numeric(precision=6, scale=3), nullable=True),
     sa.Column('amount', sa.Numeric(precision=18, scale=2), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['ra_bill_id'], ['ra_bills.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -72,7 +72,7 @@ def upgrade() -> None:
     sa.Column('cumulative_quantity', sa.Numeric(precision=14, scale=3), nullable=False),
     sa.Column('rate', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('amount', sa.Numeric(precision=18, scale=2), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['boq_item_id'], ['boq_items.id'], ),
     sa.ForeignKeyConstraint(['measurement_id'], ['measurements.id'], ),
     sa.ForeignKeyConstraint(['ra_bill_id'], ['ra_bills.id'], ),

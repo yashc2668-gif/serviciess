@@ -60,6 +60,16 @@ class DashboardTests(FinanceDbTestCase):
         self.assertEqual(contract_dashboard.total_billed_amount, 2500.0)
         self.assertEqual(contract_dashboard.total_paid_amount, 800.0)
         self.assertEqual(contract_dashboard.outstanding_payable, 1700.0)
+        self.assertEqual(contract_dashboard.company_name, "Test Company")
+        self.assertEqual(contract_dashboard.vendor_name, "Test Vendor")
+        self.assertEqual(contract_dashboard.material_cost_amount, 0.0)
+        self.assertEqual(contract_dashboard.labour_cost_amount, 0.0)
+        self.assertEqual(contract_dashboard.actual_cost_amount, 800.0)
+        self.assertEqual(contract_dashboard.billed_margin_amount, 1700.0)
+        self.assertEqual(len(contract_dashboard.recent_ra_bills), 2)
+        self.assertEqual(len(contract_dashboard.recent_payments), 2)
+        self.assertEqual(contract_dashboard.recent_ra_bills[0].bill_no, 32)
+        self.assertEqual(contract_dashboard.recent_payments[0].amount, 200.0)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 """Measurement endpoints."""
 
-from typing import List
-
 from fastapi import APIRouter, Depends, Response, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.permissions import require_permissions
 from app.db.session import get_db
 from app.models.user import User
+from app.schemas.common import PaginatedResponse
 from app.schemas.measurement import (
     MeasurementCreate,
     MeasurementOut,
@@ -23,6 +23,7 @@ from app.services.measurement_service import (
     submit_measurement,
     update_measurement,
 )
+from app.utils.pagination import PaginationParams, get_pagination_params
 
 router = APIRouter(prefix="/measurements", tags=["Measurements"])
 
@@ -36,14 +37,21 @@ def create_new_measurement(
     return create_measurement(db, payload, current_user)
 
 
-@router.get("/", response_model=List[MeasurementOut])
+@router.get("/", response_model=PaginatedResponse[MeasurementOut])
 def list_all_measurements(
     contract_id: int | None = None,
     status_filter: MeasurementStatus | None = None,
+    pagination: PaginationParams = Depends(get_pagination_params),
     db: Session = Depends(get_db),
-    _: User = Depends(require_permissions("measurements:read")),
+    current_user: User = Depends(require_permissions("measurements:read")),
 ):
-    return list_measurements(db, contract_id=contract_id, status_filter=status_filter)
+    return list_measurements(
+        db,
+        current_user=current_user,
+        contract_id=contract_id,
+        status_filter=status_filter,
+        pagination=pagination,
+    )
 
 
 @router.get("/{measurement_id}", response_model=MeasurementOut)
@@ -91,3 +99,26 @@ def approve_existing_measurement(
     current_user: User = Depends(require_permissions("measurements:approve")),
 ):
     return approve_measurement(db, measurement_id, current_user)
+
+
+@router.get("/{measurement_id}/pdf")
+def download_measurement_pdf(
+    measurement_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions("measurements:read")),
+):
+    import io
+
+    from app.services.pdf_service import generate_measurement_sheet_pdf
+
+    measurement = get_measurement_or_404(db, measurement_id)
+    contract = measurement.contract
+    project = contract.project
+
+    pdf_bytes = generate_measurement_sheet_pdf(measurement, contract, project)
+    filename = f"Measurement_{measurement.measurement_no}.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

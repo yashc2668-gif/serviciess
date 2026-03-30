@@ -1,7 +1,5 @@
 """Document metadata endpoints."""
 
-from typing import List
-
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -9,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.permissions import require_permissions
 from app.db.session import get_db
 from app.models.user import User
+from app.schemas.common import PaginatedResponse
 from app.schemas.document import (
     DocumentCreate,
     DocumentEntityType,
@@ -23,21 +22,81 @@ from app.services.document_service import (
     create_document_from_upload,
     get_document_or_404,
     list_documents,
+    list_documents_for_export,
     open_document_download,
     update_document_metadata,
 )
+from app.utils.csv_export import build_csv_response
+from app.utils.pagination import PaginationParams, get_pagination_params
+from app.utils.sorting import SortParams, get_sort_params
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
-@router.get("/", response_model=List[DocumentOut])
+@router.get("/", response_model=PaginatedResponse[DocumentOut])
 def list_all_documents(
     entity_type: str | None = None,
     entity_id: int | None = None,
+    search: str | None = None,
+    pagination: PaginationParams = Depends(get_pagination_params),
+    sorting: SortParams = Depends(get_sort_params),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions("documents:read")),
 ):
-    return list_documents(db, entity_type=entity_type, entity_id=entity_id)
+    return list_documents(
+        db,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        search=search,
+        pagination=pagination,
+        sort_by=sorting.sort_by,
+        sort_dir=sorting.sort_dir,
+    )
+
+
+@router.get("/export")
+def export_documents(
+    entity_type: str | None = None,
+    entity_id: int | None = None,
+    search: str | None = None,
+    sorting: SortParams = Depends(get_sort_params),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions("documents:read")),
+):
+    documents = list_documents_for_export(
+        db,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        search=search,
+        sort_by=sorting.sort_by,
+        sort_dir=sorting.sort_dir,
+    )
+    return build_csv_response(
+        filename="documents-export",
+        headers=[
+            "Title",
+            "Entity Type",
+            "Entity ID",
+            "Document Type",
+            "Version",
+            "File Name",
+            "File Size",
+            "Created At",
+        ],
+        rows=[
+            [
+                document.title,
+                document.entity_type,
+                document.entity_id,
+                document.document_type,
+                document.current_version_number,
+                document.latest_file_name,
+                document.latest_file_size,
+                document.created_at,
+            ]
+            for document in documents
+        ],
+    )
 
 
 @router.post("/", response_model=DocumentOut, status_code=201)

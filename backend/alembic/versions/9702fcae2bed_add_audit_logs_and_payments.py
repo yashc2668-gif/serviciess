@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('contract_id', sa.Integer(), nullable=True),
     sa.Column('remarks', sa.String(length=500), nullable=True),
     sa.Column('payload', sa.JSON(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['actor_user_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['contract_id'], ['contracts.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -45,7 +45,7 @@ def upgrade() -> None:
     sa.Column('payment_mode', sa.String(length=30), nullable=True, comment='neft | rtgs | cheque | upi | cash'),
     sa.Column('reference_no', sa.String(length=100), nullable=True),
     sa.Column('remarks', sa.String(length=500), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['contract_id'], ['contracts.id'], ),
     sa.ForeignKeyConstraint(['ra_bill_id'], ['ra_bills.id'], ),
     sa.PrimaryKeyConstraint('id')

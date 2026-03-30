@@ -1,6 +1,7 @@
 """Project model."""
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -37,10 +38,14 @@ class Project(Base):
         default="active",
         comment="active | completed | on_hold | cancelled",
     )
+    is_deleted = Column(Boolean, nullable=False, default=False, index=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    lock_version = Column(Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": lock_version}
 
     company = relationship("Company", backref="projects")
     contracts = relationship(

@@ -21,18 +21,40 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp_code: str = Field(..., min_length=4, max_length=10)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
+class LogoutRequest(BaseModel):
+    revoke_all_sessions: bool = False
+
+
 class TokenPayload(BaseModel):
     sub: str
-    email: EmailStr
-    role: str
+    email: EmailStr | None = None
+    role: str | None = None
     exp: int
+    type: str = "access"
+    jti: str | None = None
 
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
+    refresh_expires_in: int
+    csrf_token: str
     user: UserOut
+
+
+class MessageResponse(BaseModel):
+    message: str
 
 
 class ProtectedRouteResponse(BaseModel):

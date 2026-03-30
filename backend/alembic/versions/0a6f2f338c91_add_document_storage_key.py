@@ -28,6 +28,7 @@ documents_table = sa.table(
 
 
 def upgrade() -> None:
+    is_sqlite = op.get_bind().dialect.name == "sqlite"
     op.add_column("documents", sa.Column("storage_key", sa.String(length=36), nullable=True))
 
     connection = op.get_bind()
@@ -42,7 +43,11 @@ def upgrade() -> None:
             .values(storage_key=str(uuid4()))
         )
 
-    op.alter_column("documents", "storage_key", nullable=False)
+    if is_sqlite:
+        with op.batch_alter_table("documents") as batch_op:
+            batch_op.alter_column("storage_key", existing_type=sa.String(length=36), nullable=False)
+    else:
+        op.alter_column("documents", "storage_key", nullable=False)
     op.create_index(op.f("ix_documents_storage_key"), "documents", ["storage_key"], unique=False)
 
 

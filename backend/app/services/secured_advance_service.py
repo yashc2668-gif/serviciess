@@ -13,10 +13,23 @@ from app.models.secured_advance_recovery import SecuredAdvanceRecovery
 from app.models.user import User
 from app.schemas.secured_advance import SecuredAdvanceIssueCreate, SecuredAdvanceUpdate
 from app.services.audit_service import log_audit_event, serialize_model
+from app.services.company_scope_service import (
+    apply_contract_company_scope,
+    apply_secured_advance_company_scope,
+    resolve_company_scope,
+)
+from app.utils.pagination import PaginationParams, paginate_query
 
 
-def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
-    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+def _get_contract_or_404(db: Session, contract_id: int, *, current_user: User) -> Contract:
+    contract = (
+        apply_contract_company_scope(
+            db.query(Contract).filter(Contract.is_deleted.is_(False)),
+            resolve_company_scope(current_user),
+        )
+        .filter(Contract.id == contract_id)
+        .first()
+    )
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -25,10 +38,19 @@ def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
     return contract
 
 
-def get_secured_advance_or_404(db: Session, secured_advance_id: int) -> SecuredAdvance:
+def get_secured_advance_or_404(
+    db: Session,
+    secured_advance_id: int,
+    *,
+    current_user: User,
+) -> SecuredAdvance:
     advance = (
-        db.query(SecuredAdvance)
-        .options(joinedload(SecuredAdvance.recoveries))
+        apply_secured_advance_company_scope(
+            db.query(SecuredAdvance)
+            .options(joinedload(SecuredAdvance.recoveries))
+            .filter(SecuredAdvance.is_archived.is_(False)),
+            resolve_company_scope(current_user),
+        )
         .filter(SecuredAdvance.id == secured_advance_id)
         .first()
     )
@@ -40,23 +62,43 @@ def get_secured_advance_or_404(db: Session, secured_advance_id: int) -> SecuredA
     return advance
 
 
-def list_secured_advances(db: Session, contract_id: int | None = None) -> list[SecuredAdvance]:
-    query = db.query(SecuredAdvance).options(joinedload(SecuredAdvance.recoveries))
+def list_secured_advances(
+    db: Session,
+    current_user: User,
+    contract_id: int | None = None,
+    *,
+    pagination: PaginationParams,
+) -> dict[str, object]:
+    query = apply_secured_advance_company_scope(
+        db.query(SecuredAdvance)
+        .options(joinedload(SecuredAdvance.recoveries))
+        .filter(SecuredAdvance.is_archived.is_(False)),
+        resolve_company_scope(current_user),
+    )
     if contract_id is not None:
         query = query.filter(SecuredAdvance.contract_id == contract_id)
-    return query.order_by(SecuredAdvance.advance_date.desc(), SecuredAdvance.id.desc()).all()
+    return paginate_query(
+        query.order_by(SecuredAdvance.advance_date.desc(), SecuredAdvance.id.desc()),
+        pagination=pagination,
+    )
 
 
 def list_secured_advance_recoveries(
     db: Session,
+    current_user: User,
     secured_advance_id: int,
-) -> list[SecuredAdvanceRecovery]:
-    get_secured_advance_or_404(db, secured_advance_id)
-    return (
+    *,
+    pagination: PaginationParams,
+) -> dict[str, object]:
+    get_secured_advance_or_404(db, secured_advance_id, current_user=current_user)
+    return paginate_query(
         db.query(SecuredAdvanceRecovery)
         .filter(SecuredAdvanceRecovery.secured_advance_id == secured_advance_id)
-        .order_by(SecuredAdvanceRecovery.recovery_date.asc(), SecuredAdvanceRecovery.id.asc())
-        .all()
+        .order_by(
+            SecuredAdvanceRecovery.recovery_date.asc(),
+            SecuredAdvanceRecovery.id.asc(),
+        ),
+        pagination=pagination,
     )
 
 
@@ -65,7 +107,7 @@ def issue_secured_advance(
     payload: SecuredAdvanceIssueCreate,
     current_user: User,
 ) -> SecuredAdvance:
-    _get_contract_or_404(db, payload.contract_id)
+    _get_contract_or_404(db, payload.contract_id, current_user=current_user)
     amount = Decimal(str(payload.advance_amount))
     advance = SecuredAdvance(
         contract_id=payload.contract_id,
@@ -90,7 +132,7 @@ def issue_secured_advance(
     )
     db.commit()
     db.refresh(advance)
-    return get_secured_advance_or_404(db, advance.id)
+    return get_secured_advance_or_404(db, advance.id, current_user=current_user)
 
 
 def update_secured_advance(
@@ -99,7 +141,7 @@ def update_secured_advance(
     payload: SecuredAdvanceUpdate,
     current_user: User,
 ) -> SecuredAdvance:
-    advance = get_secured_advance_or_404(db, secured_advance_id)
+    advance = get_secured_advance_or_404(db, secured_advance_id, current_user=current_user)
     updates = payload.model_dump(exclude_unset=True, mode="json")
     before_data = serialize_model(advance)
     for field, value in updates.items():
@@ -116,7 +158,7 @@ def update_secured_advance(
     )
     db.commit()
     db.refresh(advance)
-    return get_secured_advance_or_404(db, advance.id)
+    return get_secured_advance_or_404(db, advance.id, current_user=current_user)
 
 
 def validate_secured_advance_recoveries_for_bill(db: Session, bill) -> None:
@@ -128,7 +170,19 @@ def validate_secured_advance_recoveries_for_bill(db: Session, bill) -> None:
         requested_by_advance[deduction.secured_advance_id] += Decimal(str(deduction.amount or 0))
 
     for secured_advance_id, requested in requested_by_advance.items():
-        advance = get_secured_advance_or_404(db, secured_advance_id)
+        advance = (
+            db.query(SecuredAdvance)
+            .filter(
+                SecuredAdvance.id == secured_advance_id,
+                SecuredAdvance.is_archived.is_(False),
+            )
+            .first()
+        )
+        if not advance:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Secured advance not found for id={secured_advance_id}",
+            )
         available = Decimal(str(advance.balance or 0))
         if requested > available:
             raise HTTPException(

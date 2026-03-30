@@ -24,11 +24,23 @@ from app.schemas.ra_bill import (
     RABillStatus,
 )
 from app.services.audit_service import log_audit_event, serialize_model, serialize_models
+from app.services.company_scope_service import (
+    apply_contract_company_scope,
+    apply_ra_bill_company_scope,
+    resolve_company_scope,
+)
+from app.services.concurrency_service import (
+    apply_write_lock,
+    commit_with_conflict_handling,
+    ensure_lock_version_matches,
+    flush_with_conflict_handling,
+)
 from app.services.deduction_service import build_deduction_models
 from app.services.secured_advance_service import (
     apply_secured_advance_recoveries_for_bill,
     validate_secured_advance_recoveries_for_bill,
 )
+from app.utils.pagination import PaginationParams, paginate_query
 
 RA_BILL_ALLOWED_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"submitted", "cancelled"},
@@ -51,8 +63,15 @@ def _validate_period(period_from, period_to) -> None:
         )
 
 
-def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
-    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+def _get_contract_or_404(db: Session, contract_id: int, *, current_user: User) -> Contract:
+    contract = (
+        apply_contract_company_scope(
+            db.query(Contract).filter(Contract.is_deleted.is_(False)),
+            resolve_company_scope(current_user),
+        )
+        .filter(Contract.id == contract_id)
+        .first()
+    )
     if not contract:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -61,17 +80,33 @@ def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
     return contract
 
 
-def _get_ra_bill_query(db: Session):
-    return db.query(RABill).options(
+def _get_ra_bill_query(db: Session, *, lock_for_update: bool = False):
+    query = db.query(RABill).options(
         joinedload(RABill.items),
         joinedload(RABill.deductions).joinedload(Deduction.secured_advance),
         joinedload(RABill.status_logs),
         joinedload(RABill.payment_allocations),
+    ).filter(RABill.is_archived.is_(False))
+    if lock_for_update:
+        query = apply_write_lock(query, db)
+    return query
+
+
+def get_ra_bill_or_404(
+    db: Session,
+    bill_id: int,
+    *,
+    current_user: User,
+    lock_for_update: bool = False,
+) -> RABill:
+    bill = (
+        apply_ra_bill_company_scope(
+            _get_ra_bill_query(db, lock_for_update=lock_for_update),
+            resolve_company_scope(current_user),
+        )
+        .filter(RABill.id == bill_id)
+        .first()
     )
-
-
-def get_ra_bill_or_404(db: Session, bill_id: int) -> RABill:
-    bill = _get_ra_bill_query(db).filter(RABill.id == bill_id).first()
     if not bill:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -80,11 +115,23 @@ def get_ra_bill_or_404(db: Session, bill_id: int) -> RABill:
     return bill
 
 
-def list_ra_bills(db: Session, contract_id: int | None = None) -> list[RABill]:
-    query = _get_ra_bill_query(db)
+def list_ra_bills(
+    db: Session,
+    current_user: User,
+    contract_id: int | None = None,
+    *,
+    pagination: PaginationParams,
+) -> dict[str, object]:
+    query = apply_ra_bill_company_scope(
+        _get_ra_bill_query(db),
+        resolve_company_scope(current_user),
+    )
     if contract_id is not None:
         query = query.filter(RABill.contract_id == contract_id)
-    return query.order_by(RABill.bill_no.desc(), RABill.id.desc()).all()
+    return paginate_query(
+        query.order_by(RABill.bill_no.desc(), RABill.id.desc()),
+        pagination=pagination,
+    )
 
 
 def _ensure_draft_bill(bill: RABill) -> None:
@@ -227,7 +274,7 @@ def _deduction_snapshot(bill: RABill) -> dict:
 
 
 def create_ra_bill_draft(db: Session, payload: RABillCreate, current_user: User) -> RABill:
-    _get_contract_or_404(db, payload.contract_id)
+    _get_contract_or_404(db, payload.contract_id, current_user=current_user)
     _validate_period(payload.period_from, payload.period_to)
 
     bill_no = payload.bill_no or _next_bill_no(db, payload.contract_id)
@@ -243,7 +290,7 @@ def create_ra_bill_draft(db: Session, payload: RABillCreate, current_user: User)
         status="draft",
     )
     db.add(bill)
-    db.flush()
+    flush_with_conflict_handling(db, entity_name="RA bill")
 
     _replace_deductions(bill, payload.deductions, gross_amount=0)
     totals = calculate_bill_totals([], bill.deductions)
@@ -269,9 +316,9 @@ def create_ra_bill_draft(db: Session, payload: RABillCreate, current_user: User)
             remarks=f"Initial deductions for RA Bill {bill.bill_no}",
         )
 
-    db.commit()
+    commit_with_conflict_handling(db, entity_name="RA bill")
     db.refresh(bill)
-    return get_ra_bill_or_404(db, bill.id)
+    return get_ra_bill_or_404(db, bill.id, current_user=current_user)
 
 
 def _billed_work_done_ids_query(db: Session, bill: RABill):
@@ -293,19 +340,25 @@ def generate_ra_bill_items(
     current_user: User,
     payload: RABillGenerateRequest | None = None,
 ) -> RABill:
-    bill = get_ra_bill_or_404(db, bill_id)
+    bill = get_ra_bill_or_404(db, bill_id, current_user=current_user, lock_for_update=True)
     _ensure_draft_bill(bill)
+    ensure_lock_version_matches(
+        bill,
+        payload.lock_version if payload is not None else None,
+        entity_name="RA bill",
+    )
     _validate_period(bill.period_from, bill.period_to)
     had_existing_items = bool(bill.items)
-    contract = _get_contract_or_404(db, bill.contract_id)
+    contract = _get_contract_or_404(db, bill.contract_id, current_user=current_user)
     before_bill_data = _bill_snapshot(bill)
     before_deduction_data = _deduction_snapshot(bill)
 
     excluded_work_done_ids = _billed_work_done_ids_query(db, bill)
-    work_done_query = (
+    work_done_query = apply_write_lock(
         db.query(WorkDoneItem)
         .options(joinedload(WorkDoneItem.boq_item))
-        .filter(WorkDoneItem.contract_id == bill.contract_id)
+        .filter(WorkDoneItem.contract_id == bill.contract_id),
+        db,
     )
     if bill.period_from is not None:
         work_done_query = work_done_query.filter(WorkDoneItem.recorded_date >= bill.period_from)
@@ -319,7 +372,7 @@ def generate_ra_bill_items(
     ).all()
 
     bill.items.clear()
-    db.flush()
+    flush_with_conflict_handling(db, entity_name="RA bill")
     for entry in work_done_entries:
         bill.items.append(
             RABillItem(
@@ -369,7 +422,7 @@ def generate_ra_bill_items(
         remarks=f"Deductions updated for RA Bill {bill.bill_no}",
     )
 
-    db.commit()
+    commit_with_conflict_handling(db, entity_name="RA bill")
     db.refresh(bill)
     log_business_event(
         "ra_bill.generated",
@@ -381,12 +434,24 @@ def generate_ra_bill_items(
         gross_amount=float(bill.gross_amount or 0),
         net_payable=float(bill.net_payable or 0),
     )
-    return get_ra_bill_or_404(db, bill.id)
+    return get_ra_bill_or_404(db, bill.id, current_user=current_user)
 
 
-def submit_ra_bill(db: Session, bill_id: int, current_user: User, remarks: str | None = None) -> RABill:
-    bill = get_ra_bill_or_404(db, bill_id)
+def submit_ra_bill(
+    db: Session,
+    bill_id: int,
+    current_user: User,
+    *,
+    expected_lock_version: int | None = None,
+    remarks: str | None = None,
+) -> RABill:
+    bill = get_ra_bill_or_404(db, bill_id, current_user=current_user, lock_for_update=True)
     _ensure_draft_bill(bill)
+    ensure_lock_version_matches(
+        bill,
+        expected_lock_version,
+        entity_name="RA bill",
+    )
     if not bill.items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -423,7 +488,7 @@ def submit_ra_bill(db: Session, bill_id: int, current_user: User, remarks: str |
         remarks=remarks,
     )
 
-    db.commit()
+    commit_with_conflict_handling(db, entity_name="RA bill")
     db.refresh(bill)
     log_business_event(
         "ra_bill.submitted",
@@ -433,7 +498,7 @@ def submit_ra_bill(db: Session, bill_id: int, current_user: User, remarks: str |
         status=bill.status,
         net_payable=float(bill.net_payable or 0),
     )
-    return get_ra_bill_or_404(db, bill.id)
+    return get_ra_bill_or_404(db, bill.id, current_user=current_user)
 
 
 def transition_ra_bill_status(
@@ -441,10 +506,16 @@ def transition_ra_bill_status(
     bill_id: int,
     target_status: RABillStatus,
     current_user: User,
+    expected_lock_version: int | None = None,
     remarks: str | None = None,
     action: str | None = None,
 ) -> RABill:
-    bill = get_ra_bill_or_404(db, bill_id)
+    bill = get_ra_bill_or_404(db, bill_id, current_user=current_user, lock_for_update=True)
+    ensure_lock_version_matches(
+        bill,
+        expected_lock_version,
+        entity_name="RA bill",
+    )
     validate_ra_bill_transition(bill.status, target_status, remarks)
 
     previous_status = bill.status
@@ -474,7 +545,7 @@ def transition_ra_bill_status(
         remarks=remarks,
     )
 
-    db.commit()
+    commit_with_conflict_handling(db, entity_name="RA bill")
     db.refresh(bill)
     log_business_event(
         "ra_bill.transitioned",
@@ -485,7 +556,7 @@ def transition_ra_bill_status(
         to_status=target_status,
         net_payable=float(bill.net_payable or 0),
     )
-    return get_ra_bill_or_404(db, bill.id)
+    return get_ra_bill_or_404(db, bill.id, current_user=current_user)
 
 
 def sync_ra_bill_payment_status(

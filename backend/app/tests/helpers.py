@@ -9,9 +9,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.db.session import Base
+from app.models.boq import BOQItem
 from app.models.company import Company
 from app.models.contract import Contract
 from app.models.deduction import Deduction
+from app.models.labour import Labour
+from app.models.labour_contractor import LabourContractor
 from app.models.payment import Payment
 from app.models.payment_allocation import PaymentAllocation
 from app.models.project import Project
@@ -190,3 +193,129 @@ class FinanceDbTestCase(unittest.TestCase):
         self.db.commit()
         self.db.refresh(advance)
         return advance
+
+
+class OperationsDbTestCase(unittest.TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+        self.SessionLocal = sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
+        Base.metadata.create_all(bind=self.engine)
+        self.db = self.SessionLocal()
+
+        self.company = Company(name="Ops Test Company")
+        self.user = User(
+            full_name="Ops Admin",
+            email="ops-admin@example.com",
+            hashed_password="not-used",
+            role="admin",
+            is_active=True,
+        )
+        self.vendor = Vendor(name="Ops Vendor", code="OPS-VEN-001", vendor_type="supplier")
+        self.db.add_all([self.company, self.user, self.vendor])
+        self.db.flush()
+
+        self.user.company_id = self.company.id
+        self.vendor.company_id = self.company.id
+
+        self.project = Project(
+            company_id=self.company.id,
+            name="Ops Test Project",
+            code="OPS-PRJ-001",
+            original_value=Decimal("50000.00"),
+            revised_value=Decimal("50000.00"),
+            status="active",
+        )
+        self.db.add(self.project)
+        self.db.flush()
+
+        self.contract = Contract(
+            project_id=self.project.id,
+            vendor_id=self.vendor.id,
+            contract_no="OPS-CTR-001",
+            title="Ops Contract",
+            original_value=Decimal("50000.00"),
+            revised_value=Decimal("50000.00"),
+            retention_percentage=Decimal("5.00"),
+            status="active",
+        )
+        self.db.add(self.contract)
+        self.db.commit()
+        self.db.refresh(self.company)
+        self.db.refresh(self.user)
+        self.db.refresh(self.vendor)
+        self.db.refresh(self.project)
+        self.db.refresh(self.contract)
+
+    def tearDown(self):
+        self.db.close()
+        self.engine.dispose()
+
+    def create_boq_item(
+        self,
+        *,
+        item_code: str = "BOQ-001",
+        description: str = "Excavation",
+        unit: str = "cum",
+        quantity: str | float = "100",
+        rate: str | float = "25",
+        amount: str | float | None = None,
+        category: str | None = "Civil",
+    ) -> BOQItem:
+        boq_item = BOQItem(
+            contract_id=self.contract.id,
+            item_code=item_code,
+            description=description,
+            unit=unit,
+            quantity=Decimal(str(quantity)),
+            rate=Decimal(str(rate)),
+            amount=Decimal(str(amount if amount is not None else Decimal(str(quantity)) * Decimal(str(rate)))),
+            category=category,
+        )
+        self.db.add(boq_item)
+        self.db.commit()
+        self.db.refresh(boq_item)
+        return boq_item
+
+    def create_labour_contractor(
+        self,
+        *,
+        contractor_code: str = "LCTR-001",
+        contractor_name: str = "Alpha Labour Supplier",
+    ) -> LabourContractor:
+        contractor = LabourContractor(
+            company_id=self.company.id,
+            contractor_code=contractor_code,
+            contractor_name=contractor_name,
+            contact_person=f"{contractor_name} Contact",
+            phone="9999999999",
+        )
+        self.db.add(contractor)
+        self.db.commit()
+        self.db.refresh(contractor)
+        return contractor
+
+    def create_labour(
+        self,
+        *,
+        labour_code: str = "LAB-001",
+        full_name: str = "Ramesh Kumar",
+        trade: str = "Mason",
+        contractor_id: int | None = None,
+    ) -> Labour:
+        labour = Labour(
+            company_id=self.company.id,
+            labour_code=labour_code,
+            full_name=full_name,
+            trade=trade,
+            skill_level="Skilled",
+            daily_rate=Decimal("700"),
+            skill_type=trade,
+            default_wage_rate=Decimal("700"),
+            unit="day",
+            contractor_id=contractor_id,
+            is_active=True,
+        )
+        self.db.add(labour)
+        self.db.commit()
+        self.db.refresh(labour)
+        return labour

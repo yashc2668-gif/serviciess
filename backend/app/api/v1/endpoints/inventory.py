@@ -1,5 +1,3 @@
-"""Inventory endpoints placeholder."""
+"""Backward-compatible stock ledger endpoint alias."""
 
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/inventory", tags=["Inventory"])
+from app.api.v1.endpoints.stock_ledger import router

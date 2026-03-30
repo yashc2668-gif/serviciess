@@ -1,0 +1,16 @@
+[run]
+source =
+    app/services
+    app/calculators
+    app/workflows
+relative_files = True
+
+[report]
+fail_under = 80
+show_missing = True
+skip_empty = True
+omit =
+    */__init__.py
+exclude_lines =
+    pragma: no cover
+    if __name__ == "__main__":

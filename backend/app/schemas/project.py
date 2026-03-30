@@ -21,6 +21,7 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectUpdate(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     company_id: Optional[int] = None
     name: Optional[str] = Field(default=None, min_length=2, max_length=300)
     code: Optional[str] = Field(default=None, max_length=50)
@@ -49,6 +50,7 @@ class ProjectOut(BaseModel):
     expected_end_date: Optional[date]
     actual_end_date: Optional[date]
     status: str
+    lock_version: int
     created_at: datetime
     updated_at: Optional[datetime]
 

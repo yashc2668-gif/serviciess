@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 
 class VendorCreate(BaseModel):
+    company_id: Optional[int] = Field(default=None, ge=1)
     name: str = Field(..., min_length=2, max_length=255)
     code: Optional[str] = Field(default=None, max_length=50)
     vendor_type: str = Field(default="contractor", max_length=50)
@@ -19,6 +20,8 @@ class VendorCreate(BaseModel):
 
 
 class VendorUpdate(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
+    company_id: Optional[int] = Field(default=None, ge=1)
     name: Optional[str] = Field(default=None, min_length=2, max_length=255)
     code: Optional[str] = Field(default=None, max_length=50)
     vendor_type: Optional[str] = Field(default=None, max_length=50)
@@ -32,6 +35,7 @@ class VendorUpdate(BaseModel):
 
 class VendorOut(BaseModel):
     id: int
+    company_id: Optional[int]
     name: str
     code: Optional[str]
     vendor_type: str
@@ -41,6 +45,7 @@ class VendorOut(BaseModel):
     gst_number: Optional[str]
     pan_number: Optional[str]
     address: Optional[str]
+    lock_version: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 

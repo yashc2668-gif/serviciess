@@ -36,6 +36,7 @@ class PaymentCreate(BaseModel):
 
 
 class PaymentActionRequest(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     remarks: Optional[str] = Field(default=None, max_length=500)
 
 
@@ -65,6 +66,7 @@ class PaymentOut(BaseModel):
     allocated_amount: float = 0
     available_amount: float = 0
     allocations: list[PaymentAllocationOut] = Field(default_factory=list)
+    lock_version: int
     created_at: datetime
     updated_at: Optional[datetime]
 

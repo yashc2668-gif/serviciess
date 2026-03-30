@@ -5,15 +5,20 @@ from datetime import date
 from decimal import Decimal
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.contract import Contract
 from app.models.deduction import Deduction
+from app.models.labour_bill import LabourBill
+from app.models.material_issue import MaterialIssue
 from app.models.payment import Payment
 from app.models.project import Project
 from app.models.ra_bill import RABill
 from app.models.secured_advance import SecuredAdvance
 from app.schemas.dashboard import (
+    ContractRecentPaymentOut,
+    ContractRecentRABillOut,
     ContractDashboardOut,
     ContractOutstandingOut,
     DashboardFinanceOut,
@@ -42,6 +47,7 @@ PENDING_RA_BILL_STATUSES = {
     "finance_hold",
 }
 PENDING_PAYMENT_STATUSES = {"draft", "approved"}
+ACTUAL_COST_LABOUR_STATUSES = {"approved", "paid"}
 
 
 def _to_decimal(value) -> Decimal:
@@ -106,7 +112,8 @@ def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
     contract = (
         db.query(Contract)
         .options(
-            selectinload(Contract.project),
+            selectinload(Contract.project).selectinload(Project.company),
+            selectinload(Contract.vendor),
             selectinload(Contract.ra_bills).selectinload(RABill.payment_allocations),
             selectinload(Contract.ra_bills).selectinload(RABill.deductions),
             selectinload(Contract.payments),
@@ -350,24 +357,112 @@ def get_project_dashboard(db: Session, project_id: int) -> ProjectDashboardOut:
 def get_contract_dashboard(db: Session, contract_id: int) -> ContractDashboardOut:
     contract = _get_contract_or_404(db, contract_id)
     metrics = _contract_metrics(contract)
+    material_cost_amount = _to_float(
+        db.query(func.coalesce(func.sum(MaterialIssue.total_amount), 0))
+        .filter(
+            MaterialIssue.contract_id == contract.id,
+            MaterialIssue.status == "issued",
+        )
+        .scalar()
+    )
+    labour_cost_amount = _to_float(
+        db.query(func.coalesce(func.sum(LabourBill.net_payable), 0))
+        .filter(
+            LabourBill.contract_id == contract.id,
+            LabourBill.status.in_(ACTUAL_COST_LABOUR_STATUSES),
+        )
+        .scalar()
+    )
+    actual_cost_amount = (
+        _to_float(metrics["paid_amount"]) + material_cost_amount + labour_cost_amount
+    )
+    contract_value = _to_float(contract.revised_value)
+    commercial_headroom_amount = contract_value - actual_cost_amount
+    billed_margin_amount = _to_float(metrics["billed_amount"]) - actual_cost_amount
+    headroom_pct = (
+        (commercial_headroom_amount * 100.0) / contract_value
+        if contract_value > 0
+        else 0.0
+    )
+
+    recent_ra_bills = [
+        ContractRecentRABillOut(
+            bill_id=bill.id,
+            bill_no=bill.bill_no,
+            bill_date=bill.bill_date,
+            status=bill.status,
+            net_payable=_to_float(bill.net_payable),
+            paid_amount=_to_float(_ra_bill_paid_amount(bill)),
+            outstanding_amount=_to_float(
+                max(_to_decimal(bill.net_payable) - _ra_bill_paid_amount(bill), Decimal("0"))
+            ),
+            retention_amount=_to_float(
+                sum(
+                    (
+                        _to_decimal(deduction.amount)
+                        for deduction in bill.deductions or []
+                        if deduction.deduction_type == "retention"
+                    ),
+                    Decimal("0"),
+                )
+            ),
+        )
+        for bill in sorted(
+            contract.ra_bills or [],
+            key=lambda item: (item.bill_date, item.bill_no, item.id),
+            reverse=True,
+        )[:6]
+    ]
+    recent_payments = [
+        ContractRecentPaymentOut(
+            payment_id=payment.id,
+            payment_date=payment.payment_date,
+            status=payment.status,
+            amount=_to_float(payment.amount),
+            allocated_amount=_to_float(payment.allocated_amount),
+            available_amount=_to_float(payment.available_amount),
+            ra_bill_id=payment.ra_bill_id,
+            reference_no=payment.reference_no,
+        )
+        for payment in sorted(
+            contract.payments or [],
+            key=lambda item: (item.payment_date, item.id),
+            reverse=True,
+        )[:6]
+    ]
+
     return ContractDashboardOut(
         contract_id=contract.id,
         project_id=contract.project_id,
+        company_name=contract.project.company.name if contract.project and contract.project.company else "",
         project_name=contract.project.name if contract.project else "",
+        project_code=contract.project.code if contract.project else None,
         vendor_id=contract.vendor_id,
+        vendor_name=contract.vendor.name if contract.vendor else "",
         contract_no=contract.contract_no,
         contract_title=contract.title,
         status=contract.status,
+        start_date=contract.start_date,
+        end_date=contract.end_date,
         original_value=_to_float(contract.original_value),
-        revised_value=_to_float(contract.revised_value),
+        revised_value=contract_value,
+        retention_percentage=_to_float(contract.retention_percentage),
         total_billed_amount=_to_float(metrics["billed_amount"]),
         total_paid_amount=_to_float(metrics["paid_amount"]),
         outstanding_payable=_to_float(metrics["outstanding_amount"]),
         secured_advance_outstanding=_to_float(metrics["secured_advance_outstanding"]),
+        material_cost_amount=material_cost_amount,
+        labour_cost_amount=labour_cost_amount,
+        actual_cost_amount=actual_cost_amount,
+        commercial_headroom_amount=commercial_headroom_amount,
+        billed_margin_amount=billed_margin_amount,
+        headroom_pct=headroom_pct,
         pending_ra_bills_by_status=_status_counts(metrics["ra_bill_statuses"]),
         pending_payments_by_status=_status_counts(metrics["payment_statuses"]),
         monthly_billing_trend=_trend_points(metrics["billing_trend"]),
         monthly_payment_trend=_trend_points(metrics["payment_trend"]),
         deductions_summary=_deduction_summaries(metrics["deductions_summary"]),
         retention_outstanding_amount=_to_float(metrics["retention_total"]),
+        recent_ra_bills=recent_ra_bills,
+        recent_payments=recent_payments,
     )

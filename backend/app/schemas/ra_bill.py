@@ -75,6 +75,7 @@ class RABillCreate(BaseModel):
 
 
 class RABillGenerateRequest(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     tds_percentage: Optional[float] = Field(default=None, ge=0, le=100)
     apply_contract_retention: bool = True
     deductions: list[DeductionCreate] = Field(default_factory=list)
@@ -82,10 +83,12 @@ class RABillGenerateRequest(BaseModel):
 
 
 class RABillSubmitRequest(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     remarks: Optional[str] = Field(default=None, max_length=500)
 
 
 class RABillTransitionRequest(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     remarks: Optional[str] = Field(default=None, max_length=1000)
 
 
@@ -123,6 +126,7 @@ class RABillOut(BaseModel):
     items: list[RABillItemOut] = Field(default_factory=list)
     deductions: list[DeductionOut] = Field(default_factory=list)
     status_logs: list[RABillStatusLogOut] = Field(default_factory=list)
+    lock_version: int
     created_at: datetime
     updated_at: Optional[datetime]
 

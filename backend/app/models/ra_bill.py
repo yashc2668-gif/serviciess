@@ -1,6 +1,7 @@
 """RA bill header model."""
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -45,10 +46,16 @@ class RABill(Base):
     submitted_at = Column(DateTime(timezone=True), nullable=True)
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime(timezone=True), nullable=True)
+    is_archived = Column(Boolean, nullable=False, default=False, index=True)
+    archived_at = Column(DateTime(timezone=True), nullable=True)
+    archived_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    archive_batch_id = Column(String(64), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    lock_version = Column(Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": lock_version}
 
     contract = relationship("Contract", back_populates="ra_bills")
     items = relationship(

@@ -18,9 +18,30 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def _include_object(obj, name, type_, reflected, compare_to):
+    """Filter out objects that cannot be represented in SQLite ALTER TABLE.
+
+    SQLite does not support adding foreign-key constraints via ALTER TABLE,
+    so FK diffs are always false positives when running ``alembic check``
+    against a SQLite database.
+    """
+    if type_ == "foreign_key_constraint":
+        bind = context.get_bind()
+        if bind and bind.dialect.name == "sqlite":
+            return False
+    return True
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        compare_type=True,
+        compare_server_default=False,
+        include_object=_include_object,
+    )
     with context.begin_transaction():
         context.run_migrations()
 
@@ -32,7 +53,13 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=False,
+            include_object=_include_object,
+        )
         with context.begin_transaction():
             context.run_migrations()
 

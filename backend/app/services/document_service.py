@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, status
 from fastapi import UploadFile
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging import log_business_event
@@ -24,6 +25,8 @@ from app.schemas.document import (
 )
 from app.services.audit_service import log_audit_event, serialize_model
 from app.utils.file_upload import build_secure_storage_path, validate_document_upload
+from app.utils.pagination import PaginationParams, paginate_query
+from app.utils.sorting import SortDirection, apply_sorting
 
 
 SUPPORTED_DOCUMENT_ENTITY_MODELS = {
@@ -51,6 +54,43 @@ def _validate_entity_linkage(db: Session, entity_type: str, entity_id: int) -> N
 
 def _document_query(db: Session):
     return db.query(Document).options(selectinload(Document.versions))
+
+
+DOCUMENT_SORT_OPTIONS = {
+    "title": (Document.title, Document.id),
+    "entity_type": (Document.entity_type, Document.entity_id, Document.id),
+    "document_type": (func.coalesce(Document.document_type, ""), Document.id),
+    "current_version_number": (Document.current_version_number, Document.id),
+    "latest_file_size": (Document.latest_file_size, Document.id),
+    "created_at": (Document.created_at, Document.id),
+    "updated_at": (Document.updated_at, Document.id),
+}
+
+DOCUMENT_DEFAULT_ORDER = (Document.updated_at.desc(), Document.id.desc())
+
+
+def _document_list_query(
+    db: Session,
+    *,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
+    search: str | None = None,
+):
+    query = _document_query(db)
+    if entity_type is not None:
+        query = query.filter(Document.entity_type == entity_type)
+    if entity_id is not None:
+        query = query.filter(Document.entity_id == entity_id)
+    if search:
+        search_term = f"%{search.strip()}%"
+        query = query.filter(
+            or_(
+                Document.title.ilike(search_term),
+                Document.latest_file_name.ilike(search_term),
+                Document.document_type.ilike(search_term),
+            )
+        )
+    return query
 
 
 def _document_audit_payload(document: Document) -> dict:
@@ -155,13 +195,51 @@ def list_documents(
     *,
     entity_type: str | None = None,
     entity_id: int | None = None,
+    search: str | None = None,
+    pagination: PaginationParams,
+    sort_by: str | None = None,
+    sort_dir: SortDirection = SortDirection.ASC,
+) -> dict[str, object]:
+    query = _document_list_query(
+        db,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        search=search,
+    )
+    return paginate_query(
+        apply_sorting(
+            query,
+            sort_by=sort_by,
+            sort_dir=sort_dir,
+            sort_options=DOCUMENT_SORT_OPTIONS,
+            default_order=DOCUMENT_DEFAULT_ORDER,
+        ),
+        pagination=pagination,
+    )
+
+
+def list_documents_for_export(
+    db: Session,
+    *,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
+    search: str | None = None,
+    sort_by: str | None = None,
+    sort_dir: SortDirection = SortDirection.ASC,
 ) -> list[Document]:
-    query = _document_query(db)
-    if entity_type is not None:
-        query = query.filter(Document.entity_type == entity_type)
-    if entity_id is not None:
-        query = query.filter(Document.entity_id == entity_id)
-    return query.order_by(Document.updated_at.desc(), Document.id.desc()).all()
+    query = _document_list_query(
+        db,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        search=search,
+    )
+    return apply_sorting(
+        query,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
+        sort_options=DOCUMENT_SORT_OPTIONS,
+        default_order=DOCUMENT_DEFAULT_ORDER,
+    ).all()
 
 
 def create_document(

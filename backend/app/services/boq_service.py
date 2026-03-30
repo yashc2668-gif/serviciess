@@ -8,6 +8,7 @@ from app.models.contract import Contract
 from app.models.user import User
 from app.schemas.boq import BOQItemCreate, BOQItemUpdate
 from app.services.audit_service import log_audit_event, serialize_model
+from app.utils.pagination import PaginationParams, paginate_query
 
 
 def _get_contract_or_404(db: Session, contract_id: int) -> Contract:
@@ -51,13 +52,18 @@ def create_boq_item_with_audit(
     return boq_item
 
 
-def list_boq_items_by_contract(db: Session, contract_id: int) -> list[BOQItem]:
+def list_boq_items_by_contract(
+    db: Session,
+    contract_id: int,
+    *,
+    pagination: PaginationParams,
+) -> dict[str, object]:
     _get_contract_or_404(db, contract_id)
-    return (
+    return paginate_query(
         db.query(BOQItem)
         .filter(BOQItem.contract_id == contract_id)
-        .order_by(BOQItem.created_at.asc(), BOQItem.id.asc())
-        .all()
+        .order_by(BOQItem.created_at.asc(), BOQItem.id.asc()),
+        pagination=pagination,
     )
 
 

@@ -35,6 +35,7 @@ class ContractCreate(BaseModel):
 
 
 class ContractUpdate(BaseModel):
+    lock_version: Optional[int] = Field(default=None, ge=1)
     vendor_id: Optional[int] = None
     contract_no: Optional[str] = Field(default=None, min_length=2, max_length=100)
     title: Optional[str] = Field(default=None, min_length=2, max_length=255)
@@ -60,6 +61,7 @@ class ContractOut(BaseModel):
     revised_value: float
     retention_percentage: float
     status: str
+    lock_version: int
     created_at: datetime
 
     model_config = {"from_attributes": True}

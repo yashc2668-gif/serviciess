@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, func
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -25,6 +25,10 @@ class SecuredAdvance(Base):
         comment="active | fully_recovered | written_off",
     )
     issued_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    is_archived = Column(Boolean, nullable=False, default=False, index=True)
+    archived_at = Column(DateTime(timezone=True), nullable=True)
+    archived_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    archive_batch_id = Column(String(64), nullable=True, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(

@@ -26,9 +26,19 @@ uploads/
 backend/uploads/
 logs/
 backend/logs/
+backups/
+backend/backups/
+restore-checks/
+backend/restore-checks/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Coverage artifacts
+backend/.coverage
+backend/.coverage.*
+backend/coverage.xml
+backend/htmlcov/

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, func
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -33,11 +33,17 @@ class Payment(Base):
     approved_at = Column(DateTime(timezone=True), nullable=True)
     released_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     released_at = Column(DateTime(timezone=True), nullable=True)
+    is_archived = Column(Boolean, nullable=False, default=False, index=True)
+    archived_at = Column(DateTime(timezone=True), nullable=True)
+    archived_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    archive_batch_id = Column(String(64), nullable=True, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    lock_version = Column(Integer, nullable=False, default=1)
+    __mapper_args__ = {"version_id_col": lock_version}
 
     contract = relationship("Contract", back_populates="payments")
     ra_bill = relationship("RABill")

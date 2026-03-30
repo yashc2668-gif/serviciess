@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.logging import get_request_id
 from app.models.audit_log import AuditLog
 from app.models.user import User
+from app.utils.pagination import PaginationParams, paginate_query
 
 
 def _json_safe(value: Any) -> Any:
@@ -86,7 +87,7 @@ def get_audit_log_or_404(db: Session, audit_log_id: int) -> AuditLog:
     return audit_log
 
 
-def list_audit_logs(
+def _build_audit_log_query(
     db: Session,
     *,
     entity_type: str | None = None,
@@ -95,7 +96,7 @@ def list_audit_logs(
     performed_by: int | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
-) -> list[AuditLog]:
+) -> Any:
     if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -119,4 +120,50 @@ def list_audit_logs(
         query = query.filter(
             AuditLog.performed_at < datetime.combine(date_to + timedelta(days=1), time.min)
         )
-    return query.order_by(AuditLog.performed_at.desc(), AuditLog.id.desc()).all()
+    return query.order_by(AuditLog.performed_at.desc(), AuditLog.id.desc())
+
+
+def list_audit_logs(
+    db: Session,
+    *,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
+    action: str | None = None,
+    performed_by: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    pagination: PaginationParams,
+) -> dict[str, object]:
+    return paginate_query(
+        _build_audit_log_query(
+            db,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            action=action,
+            performed_by=performed_by,
+            date_from=date_from,
+            date_to=date_to,
+        ),
+        pagination=pagination,
+    )
+
+
+def list_audit_logs_for_export(
+    db: Session,
+    *,
+    entity_type: str | None = None,
+    entity_id: int | None = None,
+    action: str | None = None,
+    performed_by: int | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+) -> list[AuditLog]:
+    return _build_audit_log_query(
+        db,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        action=action,
+        performed_by=performed_by,
+        date_from=date_from,
+        date_to=date_to,
+    ).all()

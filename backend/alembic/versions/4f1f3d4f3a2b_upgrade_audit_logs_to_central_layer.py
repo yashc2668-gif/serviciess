@@ -46,7 +46,7 @@ def upgrade() -> None:
             new_column_name="performed_at",
             existing_type=sa.DateTime(timezone=True),
             existing_nullable=True,
-            existing_server_default=sa.text("now()"),
+            existing_server_default=sa.text("CURRENT_TIMESTAMP"),
         )
         batch_op.add_column(sa.Column("before_data", sa.JSON(), nullable=True))
         batch_op.add_column(sa.Column("request_id", sa.String(length=100), nullable=True))
@@ -77,7 +77,7 @@ def downgrade() -> None:
             new_column_name="created_at",
             existing_type=sa.DateTime(timezone=True),
             existing_nullable=True,
-            existing_server_default=sa.text("now()"),
+            existing_server_default=sa.text("CURRENT_TIMESTAMP"),
         )
         batch_op.alter_column(
             "after_data",

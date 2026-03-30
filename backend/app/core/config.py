@@ -20,7 +20,30 @@ class Settings(BaseSettings):
     # JWT
     SECRET_KEY: str = "CHANGE-ME"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    REFRESH_TOKEN_COOKIE_NAME: str = "m2n_refresh_token"
+    CSRF_COOKIE_NAME: str = "m2n_csrf_token"
+    CSRF_HEADER_NAME: str = "X-CSRF-Token"
+    AUTH_COOKIE_SAMESITE: str = "lax"
+    AUTH_COOKIE_SECURE: bool = False
+    AUTH_RATE_LIMIT_ENABLED: bool = True
+    AUTH_RATE_LIMIT_GLOBAL: str = "100/minute"
+    AUTH_RATE_LIMIT_LOGIN: str = "5/minute"
+    AUTH_RATE_LIMIT_REGISTER: str = "3/minute"
+    AUTH_RATE_LIMIT_FORGOT_PASSWORD: str = "3/minute"
+    AUTH_RATE_LIMIT_RESET_PASSWORD: str = "5/minute"
+    AUTH_RATE_LIMIT_REFRESH: str = "10/minute"
+    LOGIN_LOCKOUT_THRESHOLD: int = 5
+    LOGIN_LOCKOUT_MINUTES: int = 15
+    PASSWORD_MIN_LENGTH: int = 8
+    PASSWORD_REQUIRE_UPPERCASE: bool = True
+    PASSWORD_REQUIRE_NUMBER: bool = True
+    PASSWORD_REQUIRE_SPECIAL: bool = True
+    PASSWORD_RESET_OTP_EXPIRE_MINUTES: int = 10
+    PASSWORD_RESET_OTP_LENGTH: int = 6
+    EMAIL_SENDER: str = "no-reply@m2n.local"
+    PASSWORD_RESET_EMAIL_SUBJECT: str = "Your M2N password reset code"
 
     # App
     PROJECT_NAME: str = "M2N Construction ERP"
@@ -30,7 +53,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app",
+        "https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app",
     ]
 
     # File storage
@@ -63,6 +87,24 @@ class Settings(BaseSettings):
     ADMIN_FULL_NAME: str = "Platform Admin"
     ADMIN_PHONE: Optional[str] = None
     ADMIN_ROLE: str = "admin"
+
+    # AI boundary
+    AI_ENABLED: bool = False
+    AI_MODE: str = "disabled"
+    AI_REQUIRE_HUMAN_REVIEW: bool = True
+    AI_REQUIRE_BACKEND_VALIDATION: bool = True
+    SECURITY_HEADERS_ENABLED: bool = True
+    CONTENT_SECURITY_POLICY: str = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data: https://fonts.gstatic.com; "
+        "connect-src 'self' http://localhost:5173 http://localhost:8000 "
+        "https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app "
+        "https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app; "
+        "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    )
 
     @field_validator("DEBUG", mode="before")
     @classmethod
@@ -100,11 +142,11 @@ class Settings(BaseSettings):
             return None
         return value
 
-    @field_validator("ENVIRONMENT", "LOG_LEVEL", mode="before")
+    @field_validator("ENVIRONMENT", "LOG_LEVEL", "AI_MODE", "AUTH_COOKIE_SAMESITE", mode="before")
     @classmethod
     def normalize_simple_text(cls, value: Any) -> Any:
         if isinstance(value, str):
-            return value.strip()
+            return value.strip().lower()
         return value
 
     @field_validator(
@@ -134,6 +176,18 @@ class Settings(BaseSettings):
             raise ValueError("APP_PORT must be between 1 and 65535")
         if self.ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than 0")
+        if self.REFRESH_TOKEN_EXPIRE_DAYS <= 0:
+            raise ValueError("REFRESH_TOKEN_EXPIRE_DAYS must be greater than 0")
+        if self.LOGIN_LOCKOUT_THRESHOLD <= 0:
+            raise ValueError("LOGIN_LOCKOUT_THRESHOLD must be greater than 0")
+        if self.LOGIN_LOCKOUT_MINUTES <= 0:
+            raise ValueError("LOGIN_LOCKOUT_MINUTES must be greater than 0")
+        if self.PASSWORD_MIN_LENGTH < 8:
+            raise ValueError("PASSWORD_MIN_LENGTH must be at least 8")
+        if self.PASSWORD_RESET_OTP_EXPIRE_MINUTES <= 0:
+            raise ValueError("PASSWORD_RESET_OTP_EXPIRE_MINUTES must be greater than 0")
+        if self.PASSWORD_RESET_OTP_LENGTH < 4:
+            raise ValueError("PASSWORD_RESET_OTP_LENGTH must be at least 4")
         if self.MAX_UPLOAD_SIZE_MB <= 0:
             raise ValueError("MAX_UPLOAD_SIZE_MB must be greater than 0")
         if self.ENVIRONMENT.lower() in {"production", "prod"} and self.SECRET_KEY == "CHANGE-ME":
@@ -155,6 +209,20 @@ class Settings(BaseSettings):
                 for origin in normalized_origins
             ):
                 raise ValueError("Localhost CORS origins are not allowed in production")
+        if self.AI_MODE not in {"disabled", "suggestion_only"}:
+            raise ValueError("AI_MODE must be one of: disabled, suggestion_only")
+        if not self.AI_ENABLED and self.AI_MODE != "disabled":
+            raise ValueError("AI_MODE must be disabled when AI_ENABLED is false")
+        if self.AI_ENABLED and self.AI_MODE != "suggestion_only":
+            raise ValueError("AI_MODE must be suggestion_only when AI_ENABLED is true")
+        if self.AI_ENABLED and not self.AI_REQUIRE_HUMAN_REVIEW:
+            raise ValueError("AI_REQUIRE_HUMAN_REVIEW must stay enabled when AI is enabled")
+        if self.AI_ENABLED and not self.AI_REQUIRE_BACKEND_VALIDATION:
+            raise ValueError(
+                "AI_REQUIRE_BACKEND_VALIDATION must stay enabled when AI is enabled"
+            )
+        if self.AUTH_COOKIE_SAMESITE not in {"lax", "strict", "none"}:
+            raise ValueError("AUTH_COOKIE_SAMESITE must be one of: lax, strict, none")
         return self
 
     @property

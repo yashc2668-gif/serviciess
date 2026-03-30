@@ -15,6 +15,7 @@ from app.models.user import User
 from app.models.work_done import WorkDoneItem
 from app.schemas.measurement import MeasurementCreate, MeasurementItemCreate, MeasurementUpdate
 from app.services.audit_service import log_audit_event
+from app.utils.pagination import PaginationParams, paginate_query
 
 ABSURD_EXCESS_MULTIPLIER = Decimal("1.25")
 
@@ -64,13 +65,18 @@ def list_measurements(
     db: Session,
     contract_id: int | None = None,
     status_filter: str | None = None,
-) -> list[Measurement]:
+    *,
+    pagination: PaginationParams,
+) -> dict[str, object]:
     query = _get_measurement_query(db)
     if contract_id is not None:
         query = query.filter(Measurement.contract_id == contract_id)
     if status_filter is not None:
         query = query.filter(Measurement.status == status_filter)
-    return query.order_by(Measurement.created_at.desc(), Measurement.id.desc()).all()
+    return paginate_query(
+        query.order_by(Measurement.created_at.desc(), Measurement.id.desc()),
+        pagination=pagination,
+    )
 
 
 def _approved_quantity_before_measurement(
