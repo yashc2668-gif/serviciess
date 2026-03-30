@@ -1,3 +1,4 @@
+import json
 from typing import Any, List, Optional
 
 from pydantic import field_validator, model_validator
@@ -125,7 +126,7 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             trimmed = value.strip()
             if trimmed.startswith("["):
-                return trimmed
+                return json.loads(trimmed)
             return [item.strip() for item in trimmed.split(",") if item.strip()]
         return value
 
