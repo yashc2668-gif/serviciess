@@ -1,3 +1,4 @@
+# Build trigger: 2025-07-14 — force rebuild to apply corrected ALLOWED_ORIGINS env var
 from typing import Any, List, Optional
 
 from pydantic import field_validator, model_validator
