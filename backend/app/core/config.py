@@ -125,7 +125,12 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             trimmed = value.strip()
             if trimmed.startswith("["):
-                return trimmed
+                import json
+                try:
+                    return json.loads(trimmed)
+                except json.JSONDecodeError:
+                    # If JSON parsing fails, treat as comma-separated
+                    return [item.strip() for item in trimmed.split(",") if item.strip()]
             return [item.strip() for item in trimmed.split(",") if item.strip()]
         return value
 
