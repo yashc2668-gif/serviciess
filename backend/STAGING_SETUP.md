@@ -112,6 +112,9 @@ STAGING_BASE_URL=http://127.0.0.1:8000
 RUN_DEMO_SEED=true
 DEMO_LOGIN_EMAIL=demo-admin@example.com
 DEMO_LOGIN_PASSWORD=DemoPass123!
+RUN_PREDEPLOY_BACKUP=true
+BACKUP_ROOT=backups
+BACKUP_UPLOADS=true
 ```
 
 ## 7. Workflow kaun sa run hoga
@@ -123,6 +126,7 @@ GitHub Actions workflow:
 Ye workflow:
 
 - backend folder sync karta hai
+- optional pre-deploy backup chalata hai jab `RUN_PREDEPLOY_BACKUP=true`
 - server par deploy script run karta hai
 - docker compose build/up karta hai
 - readiness wait karta hai
@@ -157,6 +161,14 @@ Demo login:
 
 - email: `demo-admin@example.com`
 - password: `DemoPass123!`
+
+Backup helpers on server:
+
+```bash
+cd /opt/m2n-services-be/backend
+sh docker/backup-compose-postgres.sh
+RESTORE_MODE=scratch sh docker/restore-compose-postgres.sh backups/<backup-label>
+```
 
 ## 10. Agar workflow fail ho
 

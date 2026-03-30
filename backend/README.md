@@ -169,10 +169,41 @@ GitHub Actions workflows are included at the repo root:
 
 CI currently does:
 
+- validate fresh-db Alembic upgrade discipline
+- run `alembic check` to catch model changes missing migrations
+- smoke-test startup on empty and migrated fresh SQLite databases
 - install dependencies
 - import the app
 - run the backend test suite
 - build the backend Docker image
+
+## Backup and recovery
+
+Self-hosted Compose environments persist state in Docker volumes:
+
+- database volume: see [`docker-compose.yml`](./docker-compose.yml) and [`docker-compose.staging.yml`](./docker-compose.staging.yml)
+- uploads volume: [`docker-compose.staging.yml`](./docker-compose.staging.yml) mounts `/app/uploads`
+
+Use the dedicated runbook for exact recovery steps:
+
+- [`BACKUP_RECOVERY_RUNBOOK.md`](./BACKUP_RECOVERY_RUNBOOK.md)
+
+Helper scripts included:
+
+- `sh docker/backup-compose-postgres.sh`
+- `sh docker/restore-compose-postgres.sh backups/<backup-label>`
+
+Staging deploy can take an automatic pre-deploy backup when `RUN_PREDEPLOY_BACKUP=true` in `.env.staging`.
+
+## AI usage boundary
+
+This backend does not expose any AI-powered write workflow.
+
+- AI is disabled by default through `.env`
+- if enabled later, the only supported mode is `suggestion_only`
+- AI cannot directly create, approve, issue, allocate, pay, or mutate business records
+- final business actions must still pass backend services, DB constraints, workflow rules, and tests
+- admin-only policy inspection endpoint: `/api/v1/ai-boundary`
 
 Staging deploy expects these GitHub secrets:
 
@@ -227,6 +258,13 @@ cd backend
 .\venv\Scripts\python.exe -m alembic current
 ```
 
+Run migration discipline validation locally:
+
+```powershell
+cd backend
+.\venv\Scripts\python.exe scripts/verify_migration_discipline.py
+```
+
 ## Seed roles and admin
 
 - Roles are seeded automatically on app startup.
@@ -252,6 +290,16 @@ Default seeded roles:
 ```powershell
 cd backend
 .\venv\Scripts\python.exe -m unittest discover app/tests -v
+```
+
+Coverage gate for service/calculator/workflow logic:
+
+```powershell
+cd backend
+.\venv\Scripts\coverage.exe erase
+.\venv\Scripts\coverage.exe run -m unittest discover app/tests -v
+.\venv\Scripts\coverage.exe report
+.\venv\Scripts\coverage.exe xml
 ```
 
 Focused upload/document tests:

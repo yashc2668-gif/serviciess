@@ -22,6 +22,7 @@
 - Seed roles/admin manually: `python -m app.db.seed`
 - Start app: `uvicorn main:app --reload --host 127.0.0.1 --port 8000`
 - Run tests: `python -m unittest discover app/tests -v`
+- Run coverage gate: `coverage erase && coverage run -m unittest discover app/tests -v && coverage report && coverage xml`
 - Run upload/download focused tests: `python -m unittest app.tests.test_api_integration app.tests.test_document_upload app.tests.test_storage -v`
 
 ## Docker operations
@@ -35,7 +36,22 @@
 - Re-run migrations in backend container: `docker compose exec backend python -m alembic upgrade head`
 - Staging deploy script: `sh docker/deploy-staging.sh`
 - Staging verify script: `sh docker/verify-staging.sh`
+- Staging backup script: `sh docker/backup-compose-postgres.sh`
+- Staging restore script: `sh docker/restore-compose-postgres.sh backups/<backup-label>`
 - Ubuntu staging bootstrap: `sudo sh docker/bootstrap-staging-ubuntu.sh`
+
+## Backup and recovery
+
+- Dedicated runbook: [`BACKUP_RECOVERY_RUNBOOK.md`](./BACKUP_RECOVERY_RUNBOOK.md)
+- Recommended staging setting: `RUN_PREDEPLOY_BACKUP=true` in `.env.staging`
+- Recovery readiness includes both Postgres data and `/app/uploads` when local storage is enabled
+
+## AI usage boundary
+
+- AI is disabled by default and must not be treated as an autonomous operator
+- supported future mode is suggestion-only, not state-changing execution
+- inspect current boundary via admin-only `GET /api/v1/ai-boundary`
+- any future AI suggestion must still go through human review plus backend validation
 
 ## Bootstrap admin
 
