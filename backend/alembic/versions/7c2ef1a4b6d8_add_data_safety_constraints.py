@@ -21,13 +21,16 @@ depends_on = None
 def _constraint_exists(table_name: str, constraint_name: str) -> bool:
     """Check if a constraint already exists in the database."""
     bind = op.get_bind()
+    # Use f-string for table name since it's safe (not user input)
+    # Cast to regclass using PostgreSQL's cast syntax
+    query = f"""
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = :constraint_name 
+        AND conrelid = '{table_name}'::regclass
+    """
     result = bind.execute(
-        text("""
-            SELECT 1 FROM pg_constraint 
-            WHERE conname = :constraint_name 
-            AND conrelid = :table_name::regclass
-        """),
-        {"constraint_name": constraint_name, "table_name": table_name}
+        text(query),
+        {"constraint_name": constraint_name}
     ).fetchone()
     return result is not None
 
