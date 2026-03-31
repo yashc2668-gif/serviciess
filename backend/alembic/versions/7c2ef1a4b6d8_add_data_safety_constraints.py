@@ -8,6 +8,7 @@ Create Date: 2026-03-26 19:10:00.000000
 from __future__ import annotations
 
 from alembic import op
+from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
@@ -15,6 +16,20 @@ revision = "7c2ef1a4b6d8"
 down_revision = "f3c9d12b7a6e"
 branch_labels = None
 depends_on = None
+
+
+def _constraint_exists(table_name: str, constraint_name: str) -> bool:
+    """Check if a constraint already exists in the database."""
+    bind = op.get_bind()
+    result = bind.execute(
+        text("""
+            SELECT 1 FROM pg_constraint 
+            WHERE conname = :constraint_name 
+            AND conrelid = :table_name::regclass
+        """),
+        {"constraint_name": constraint_name, "table_name": table_name}
+    ).fetchone()
+    return result is not None
 
 
 def _create_inventory_append_only_guards() -> None:
@@ -109,10 +124,11 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("material_requisition_items", schema=None) as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_material_requisition_items_requisition_material",
-            ["requisition_id", "material_id"],
-        )
+        if not _constraint_exists("material_requisition_items", "uq_material_requisition_items_requisition_material"):
+            batch_op.create_unique_constraint(
+                "uq_material_requisition_items_requisition_material",
+                ["requisition_id", "material_id"],
+            )
         batch_op.create_check_constraint(
             "ck_material_requisition_items_requested_qty_positive",
             "requested_qty > 0",
@@ -145,10 +161,11 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("material_receipt_items", schema=None) as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_material_receipt_items_receipt_material",
-            ["receipt_id", "material_id"],
-        )
+        if not _constraint_exists("material_receipt_items", "uq_material_receipt_items_receipt_material"):
+            batch_op.create_unique_constraint(
+                "uq_material_receipt_items_receipt_material",
+                ["receipt_id", "material_id"],
+            )
         batch_op.create_check_constraint(
             "ck_material_receipt_items_received_qty_positive",
             "received_qty > 0",
@@ -173,10 +190,11 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("material_issue_items", schema=None) as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_material_issue_items_issue_material",
-            ["issue_id", "material_id"],
-        )
+        if not _constraint_exists("material_issue_items", "uq_material_issue_items_issue_material"):
+            batch_op.create_unique_constraint(
+                "uq_material_issue_items_issue_material",
+                ["issue_id", "material_id"],
+            )
         batch_op.create_check_constraint(
             "ck_material_issue_items_issued_qty_positive",
             "issued_qty > 0",
@@ -201,10 +219,11 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("material_stock_adjustment_items", schema=None) as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_material_stock_adjustment_items_adjustment_material",
-            ["adjustment_id", "material_id"],
-        )
+        if not _constraint_exists("material_stock_adjustment_items", "uq_material_stock_adjustment_items_adjustment_material"):
+            batch_op.create_unique_constraint(
+                "uq_material_stock_adjustment_items_adjustment_material",
+                ["adjustment_id", "material_id"],
+            )
         batch_op.create_check_constraint(
             "ck_material_stock_adjustment_items_qty_change_nonzero",
             "qty_change <> 0",
@@ -239,10 +258,11 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("labour_attendance_items", schema=None) as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_labour_attendance_items_attendance_labour",
-            ["attendance_id", "labour_id"],
-        )
+        if not _constraint_exists("labour_attendance_items", "uq_labour_attendance_items_attendance_labour"):
+            batch_op.create_unique_constraint(
+                "uq_labour_attendance_items_attendance_labour",
+                ["attendance_id", "labour_id"],
+            )
         batch_op.create_check_constraint(
             "ck_labour_attendance_items_status_valid",
             "attendance_status IN ('present', 'absent', 'half_day', 'leave')",
