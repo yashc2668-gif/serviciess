@@ -1,3 +1,4 @@
+import json
 from typing import Any, List, Optional
 
 from pydantic import field_validator, model_validator
@@ -121,18 +122,56 @@ class Settings(BaseSettings):
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
-    def parse_allowed_origins(cls, value: Any) -> Any:
-        if isinstance(value, str):
-            trimmed = value.strip()
-            if trimmed.startswith("["):
-                import json
-                try:
-                    return json.loads(trimmed)
-                except json.JSONDecodeError:
-                    # If JSON parsing fails, treat as comma-separated
-                    return [item.strip() for item in trimmed.split(",") if item.strip()]
-            return [item.strip() for item in trimmed.split(",") if item.strip()]
-        return value
+    def parse_allowed_origins(cls, value: Any) -> List[str]:
+        """
+        Parse ALLOWED_ORIGINS from various formats to a list of strings.
+        
+        Supports:
+        1. Proper JSON array: ["http://localhost:5173","https://example.com"]
+        2. Bracket-wrapped CSV: [http://localhost:5173,https://example.com] (Railway format)
+        3. Plain comma-separated: http://localhost:5173,https://example.com
+        4. Already a list: returns as-is
+        5. Single URL string: returns as single-item list
+        
+        Args:
+            value: The raw ALLOWED_ORIGINS value from env var or config
+            
+        Returns:
+            List[str]: List of origin URLs
+        """
+        # Already a list - return as-is
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        
+        # Not a string - return empty list
+        if not isinstance(value, str):
+            return []
+        
+        trimmed = value.strip()
+        
+        # Empty string - return empty list
+        if not trimmed:
+            return []
+        
+        # Handle bracket-wrapped formats (JSON or Railway-style)
+        if trimmed.startswith("["):
+            # Try proper JSON first
+            try:
+                parsed = json.loads(trimmed)
+                if isinstance(parsed, list):
+                    return [str(item).strip() for item in parsed if str(item).strip()]
+                return []
+            except json.JSONDecodeError:
+                # Not valid JSON - treat as bracket-wrapped comma-separated
+                # Remove opening '[' and trailing ']'
+                inner = trimmed[1:].rstrip("]").strip()
+                if not inner:
+                    return []
+                # Split by comma and clean each item
+                return [item.strip() for item in inner.split(",") if item.strip()]
+        
+        # Plain comma-separated without brackets
+        return [item.strip() for item in trimmed.split(",") if item.strip()]
 
     @field_validator(
         "DATABASE_URL",
