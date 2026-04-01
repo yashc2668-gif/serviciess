@@ -20,6 +20,6 @@ USER appuser
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD sh -c "python -c \"import os, urllib.request; port = os.getenv('APP_PORT', '8000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/health/ready').read()\""
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD sh -c "python -c \"import os, urllib.request; port = os.getenv('APP_PORT', '8000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/health').read()\""
 
 ENTRYPOINT ["sh", "/app/docker/entrypoint.sh"]
