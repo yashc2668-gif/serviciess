@@ -1,19 +1,25 @@
 #!/bin/sh
 set -eu
 
-echo "Attempting database migrations..."
+echo "Waiting for database to be ready..."
 attempt=1
-until python -m alembic upgrade head
-do
-  if [ "$attempt" -ge 10 ]; then
-    echo "WARNING: Migrations failed after ${attempt} attempts. Starting app anyway for healthcheck."
-    break
-  fi
-
-  echo "Migration attempt ${attempt} failed, retrying in 3 seconds..."
+max_attempts=20
+until python -c "from app.db.session import engine; engine.connect().close()" 2>/dev/null || [ "$attempt" -ge "$max_attempts" ]; do
+  echo "Database not ready, retrying in 3 seconds (attempt $attempt/$max_attempts)..."
   attempt=$((attempt + 1))
   sleep 3
 done
+
+if [ "$attempt" -ge "$max_attempts" ]; then
+  echo "ERROR: Database never became ready. Exiting."
+  exit 1
+fi
+
+echo "Running database migrations..."
+if ! python -m alembic upgrade head; then
+  echo "ERROR: Migrations failed. Exiting."
+  exit 1
+fi
 
 RUNTIME_PORT="${PORT:-${APP_PORT:-8000}}"
 echo "Starting FastAPI on port ${RUNTIME_PORT}..."
