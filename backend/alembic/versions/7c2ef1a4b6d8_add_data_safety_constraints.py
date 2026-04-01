@@ -89,6 +89,51 @@ def _drop_inventory_append_only_guards() -> None:
 
 
 def upgrade() -> None:
+    # >>>>>>>> MINIMAL PATCH: Pre-clean legacy invalid data in material_requisition_items
+    bind = op.get_bind()
+    if bind.dialect.name == "postgresql":
+        # Fix requested_qty <= 0
+        op.execute(
+            """
+            UPDATE material_requisition_items
+            SET requested_qty = 1
+            WHERE requested_qty <= 0;
+            """
+        )
+        # Fix approved_qty < 0
+        op.execute(
+            """
+            UPDATE material_requisition_items
+            SET approved_qty = 0
+            WHERE approved_qty < 0;
+            """
+        )
+        # Fix issued_qty < 0
+        op.execute(
+            """
+            UPDATE material_requisition_items
+            SET issued_qty = 0
+            WHERE issued_qty < 0;
+            """
+        )
+        # Fix approved_qty > requested_qty
+        op.execute(
+            """
+            UPDATE material_requisition_items mi
+            SET approved_qty = requested_qty
+            WHERE approved_qty > requested_qty;
+            """
+        )
+        # Fix issued_qty > approved_qty
+        op.execute(
+            """
+            UPDATE material_requisition_items mi
+            SET issued_qty = approved_qty
+            WHERE issued_qty > approved_qty;
+            """
+        )
+    # <<<<<<<< END OF MINIMAL PATCH
+
     # Helper function to safely create unique constraints (ignore if exists)
     def create_unique_constraint_safe(table_name, constraint_name, columns):
         try:
