@@ -54,8 +54,9 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:5173",
-        "https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app",
-        "https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
     ]
 
     # File storage
