@@ -89,116 +89,75 @@ def _drop_inventory_append_only_guards() -> None:
 
 
 def upgrade() -> None:
-<<<<<<< HEAD
-    # >>>>>>>> MINIMAL PATCH: Pre-clean legacy invalid data in material_requisition_items
-    bind = op.get_bind()
-    if bind.dialect.name == "postgresql":
-        # Fix requested_qty <= 0
-=======
     bind = op.get_bind()
     dialect = bind.dialect.name
 
+    # Cleanup legacy invalid data in material_requisition_items before constraints.
+    # This keeps the migration safe for both Postgres and SQLite.
+    op.execute(
+        """
+        UPDATE material_requisition_items
+        SET requested_qty = 1
+        WHERE requested_qty <= 0;
+        """
+    )
+    op.execute(
+        """
+        UPDATE material_requisition_items
+        SET approved_qty = 0
+        WHERE approved_qty < 0;
+        """
+    )
+    op.execute(
+        """
+        UPDATE material_requisition_items
+        SET issued_qty = 0
+        WHERE issued_qty < 0;
+        """
+    )
+    op.execute(
+        """
+        UPDATE material_requisition_items
+        SET approved_qty = requested_qty
+        WHERE approved_qty > requested_qty;
+        """
+    )
+    op.execute(
+        """
+        UPDATE material_requisition_items
+        SET issued_qty = approved_qty
+        WHERE issued_qty > approved_qty;
+        """
+    )
+
     def get_existing_constraints(table_name: str) -> set[str]:
         if dialect != "postgresql":
-         return set()
+            return set()
 
         rows = bind.execute(
             text(
-             """
+                """
                 SELECT conname
                 FROM pg_constraint
                 WHERE conrelid = to_regclass(:table_name)
-             """
-          ),
-         {"table_name": table_name},
-         ).fetchall()
+                """
+            ),
+            {"table_name": table_name},
+        ).fetchall()
 
-        return {row[0] for row in rows}  
+        return {row[0] for row in rows}
 
     def create_check_if_missing(batch_op, existing: set[str], name: str, condition: str) -> None:
         if name not in existing:
             batch_op.create_check_constraint(name, condition)
 
-    def create_unique_if_missing(batch_op, existing: set[str], name: str, columns: list[str]) -> None:
+    def create_unique_if_missing(
+        batch_op, existing: set[str], name: str, columns: list[str]
+    ) -> None:
         if name not in existing:
             batch_op.create_unique_constraint(name, columns)
 
-    # Cleanup legacy data for material_requisition_items before constraints
-    if dialect == "postgresql":
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
-        op.execute(
-            """
-            UPDATE material_requisition_items
-            SET requested_qty = 1
-            WHERE requested_qty <= 0;
-            """
-        )
-<<<<<<< HEAD
-        # Fix approved_qty < 0
-=======
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
-        op.execute(
-            """
-            UPDATE material_requisition_items
-            SET approved_qty = 0
-            WHERE approved_qty < 0;
-            """
-        )
-<<<<<<< HEAD
-        # Fix issued_qty < 0
-=======
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
-        op.execute(
-            """
-            UPDATE material_requisition_items
-            SET issued_qty = 0
-            WHERE issued_qty < 0;
-            """
-        )
-<<<<<<< HEAD
-        # Fix approved_qty > requested_qty
-        op.execute(
-            """
-            UPDATE material_requisition_items mi
-=======
-        op.execute(
-            """
-            UPDATE material_requisition_items
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
-            SET approved_qty = requested_qty
-            WHERE approved_qty > requested_qty;
-            """
-        )
-<<<<<<< HEAD
-        # Fix issued_qty > approved_qty
-        op.execute(
-            """
-            UPDATE material_requisition_items mi
-=======
-        op.execute(
-            """
-            UPDATE material_requisition_items
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
-            SET issued_qty = approved_qty
-            WHERE issued_qty > approved_qty;
-            """
-        )
-<<<<<<< HEAD
-    # <<<<<<<< END OF MINIMAL PATCH
-
-    # Helper function to safely create unique constraints (ignore if exists)
-    def create_unique_constraint_safe(table_name, constraint_name, columns):
-        try:
-            with op.batch_alter_table(table_name, schema=None) as batch_op:
-                batch_op.create_unique_constraint(constraint_name, columns)
-        except ProgrammingError:
-            # Constraint already exists, skip
-            pass
-    
-=======
-
     existing = get_existing_constraints("materials")
->>>>>>> 3e50339 (Fix data safety migration for PostgreSQL)
     with op.batch_alter_table("materials", schema=None) as batch_op:
         create_check_if_missing(
             batch_op,
