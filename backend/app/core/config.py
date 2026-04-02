@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlsplit, urlunsplit
 from typing import Any, List, Optional
 
 from pydantic import field_validator, model_validator
@@ -140,15 +141,35 @@ class Settings(BaseSettings):
         Returns:
             List[str]: List of origin URLs
         """
+        def normalize_origin(origin: Any) -> str:
+            text = str(origin).strip().strip("\"'")
+            if not text:
+                return ""
+            parsed = urlsplit(text)
+            if parsed.scheme and parsed.netloc:
+                normalized_path = parsed.path.rstrip("/")
+                return urlunsplit(
+                    (parsed.scheme.lower(), parsed.netloc.lower(), normalized_path, "", "")
+                )
+            return text.rstrip("/")
+
+        def normalize_many(origins: list[Any]) -> List[str]:
+            normalized: List[str] = []
+            for origin in origins:
+                cleaned = normalize_origin(origin)
+                if cleaned and cleaned not in normalized:
+                    normalized.append(cleaned)
+            return normalized
+
         # Already a list - return as-is
         if isinstance(value, list):
-            return [str(item).strip() for item in value if str(item).strip()]
+            return normalize_many(value)
         
         # Not a string - return empty list
         if not isinstance(value, str):
             return []
         
-        trimmed = value.strip()
+        trimmed = value.strip().strip("\"'")
         
         # Empty string - return empty list
         if not trimmed:
@@ -160,7 +181,7 @@ class Settings(BaseSettings):
             try:
                 parsed = json.loads(trimmed)
                 if isinstance(parsed, list):
-                    return [str(item).strip() for item in parsed if str(item).strip()]
+                    return normalize_many(parsed)
                 return []
             except json.JSONDecodeError:
                 # Not valid JSON - treat as bracket-wrapped comma-separated
@@ -169,10 +190,10 @@ class Settings(BaseSettings):
                 if not inner:
                     return []
                 # Split by comma and clean each item
-                return [item.strip() for item in inner.split(",") if item.strip()]
-        
+                return normalize_many(inner.split(","))
+
         # Plain comma-separated without brackets
-        return [item.strip() for item in trimmed.split(",") if item.strip()]
+        return normalize_many(trimmed.split(","))
 
     @field_validator(
         "DATABASE_URL",
@@ -290,8 +311,8 @@ class Settings(BaseSettings):
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
             init_settings,
-            dotenv_settings,
             env_settings,
+            dotenv_settings,
             file_secret_settings,
         )
 
