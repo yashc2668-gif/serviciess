@@ -260,45 +260,58 @@ def _get_or_create_measurement_and_work_done(db, contract: Contract, boq_items: 
 
 def _get_or_create_finance_flow(db, contract: Contract, actor: User):
     existing_bill = db.query(Contract).filter(Contract.id == contract.id).first()
-    if existing_bill and existing_bill.ra_bills:
-        bill = existing_bill.ra_bills[0]
-        payment = existing_bill.payments[0] if existing_bill.payments else None
-        return bill, payment
+    bill = existing_bill.ra_bills[0] if existing_bill and existing_bill.ra_bills else None
+    payment = existing_bill.payments[0] if existing_bill and existing_bill.payments else None
 
-    bill = create_ra_bill_draft(
-        db,
-        RABillCreate(
-            contract_id=contract.id,
-            bill_date=date(2026, 3, 24),
-            remarks="Demo RA bill",
-        ),
-        actor,
-    )
-    bill = generate_ra_bill_items(db, bill.id, actor)
-    bill = submit_ra_bill(db, bill.id, actor, remarks="Demo submit")
-    bill = transition_ra_bill_status(db, bill.id, "verified", actor, remarks="Demo verify")
-    bill = transition_ra_bill_status(db, bill.id, "approved", actor, remarks="Demo approve")
+    if bill is None:
+        bill = create_ra_bill_draft(
+            db,
+            RABillCreate(
+                contract_id=contract.id,
+                bill_date=date(2026, 3, 24),
+                remarks="Demo RA bill",
+            ),
+            actor,
+        )
 
-    payment = create_payment(
-        db,
-        PaymentCreate(
-            contract_id=contract.id,
-            payment_date=date(2026, 3, 25),
-            amount=float(Decimal(str(bill.net_payable)) / 2),
-            payment_mode="bank_transfer",
-            reference_no="DEMO-PAY-001",
-            remarks="Partial demo payment",
-        ),
-        actor,
-    )
-    payment = approve_payment(db, payment.id, actor, remarks="Demo payment approve")
-    payment = release_payment(db, payment.id, actor, remarks="Demo payment release")
-    payment = allocate_payment(
-        db,
-        payment.id,
-        [PaymentAllocationCreate(ra_bill_id=bill.id, amount=float(payment.amount))],
-        actor,
-    )
+    if bill.status == "draft":
+        bill = generate_ra_bill_items(db, bill.id, actor)
+        bill = submit_ra_bill(db, bill.id, actor, remarks="Demo submit")
+    if bill.status in {"submitted", "finance_hold"}:
+        bill = transition_ra_bill_status(db, bill.id, "verified", actor, remarks="Demo verify")
+    if bill.status == "verified":
+        bill = transition_ra_bill_status(db, bill.id, "approved", actor, remarks="Demo approve")
+
+    if payment is None:
+        payment = create_payment(
+            db,
+            PaymentCreate(
+                contract_id=contract.id,
+                payment_date=date(2026, 3, 25),
+                amount=float(Decimal(str(bill.net_payable)) / 2),
+                payment_mode="bank_transfer",
+                reference_no="DEMO-PAY-001",
+                remarks="Partial demo payment",
+            ),
+            actor,
+        )
+
+    if payment.status == "draft":
+        payment = approve_payment(db, payment.id, actor, remarks="Demo payment approve")
+    if payment.status == "approved":
+        payment = release_payment(db, payment.id, actor, remarks="Demo payment release")
+    if payment.status == "released" and not payment.allocations:
+        allocation_amount = min(
+            Decimal(str(payment.available_amount)),
+            Decimal(str(bill.outstanding_amount)),
+        )
+        if allocation_amount > 0:
+            payment = allocate_payment(
+                db,
+                payment.id,
+                [PaymentAllocationCreate(ra_bill_id=bill.id, amount=float(allocation_amount))],
+                actor,
+            )
     return bill, payment
 
 
