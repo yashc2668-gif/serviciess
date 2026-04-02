@@ -32,11 +32,13 @@ COMPANY_SCOPE_TABLES = ("vendors", "labours", "labour_contractors")
 
 
 def upgrade() -> None:
+    false_default = sa.false()
+
     # --- soft-delete columns ---
     for table_name in SOFT_DELETE_TABLES:
         with op.batch_alter_table(table_name, schema=None) as batch_op:
             batch_op.add_column(
-                sa.Column("is_deleted", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+                sa.Column("is_deleted", sa.Boolean(), nullable=False, server_default=false_default),
             )
             batch_op.add_column(
                 sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
@@ -47,7 +49,7 @@ def upgrade() -> None:
     for table_name in ARCHIVAL_TABLES:
         with op.batch_alter_table(table_name, schema=None) as batch_op:
             batch_op.add_column(
-                sa.Column("is_archived", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+                sa.Column("is_archived", sa.Boolean(), nullable=False, server_default=false_default),
             )
             batch_op.add_column(
                 sa.Column("archived_at", sa.DateTime(timezone=True), nullable=True),
