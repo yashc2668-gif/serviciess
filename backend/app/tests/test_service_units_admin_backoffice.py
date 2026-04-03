@@ -252,6 +252,31 @@ class BOQServiceTests(OperationsDbTestCase):
         self.assertIn(("create",), audit_actions)
         self.assertIn(("update",), audit_actions)
 
+    def test_boq_listing_accepts_endpoint_style_current_user_kwarg(self):
+        create_boq_item_with_audit(
+            self.db,
+            self.contract.id,
+            BOQItemCreate(
+                item_code="BOQ-CIV-02",
+                description="PCC below foundation",
+                unit="cum",
+                quantity=5,
+                rate=4000,
+                amount=0,
+                category="Concrete",
+            ),
+            self.user,
+        )
+
+        listing = list_boq_items_by_contract(
+            self.db,
+            self.contract.id,
+            current_user=self.user,
+            pagination=PaginationParams(page=1, limit=20, skip=0),
+        )
+
+        self.assertEqual(listing["total"], 1)
+
     def test_boq_service_rejects_missing_contracts_and_items(self):
         with self.assertRaises(HTTPException) as missing_contract:
             create_boq_item(

@@ -17,12 +17,12 @@
 
 param(
     [string]$Environment = "production",
-    [string]$Debug = "False",
-    [array]$AllowedOrigins = @(
-        "https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app",
-        "https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"
-    )
+    [string]$Debug = "False"
 )
+
+# PERFECT JSON FORMAT - PRODUCTION (No localhost allowed!)
+$AllowedOrigins = '["https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
+
 
 Write-Host "🚀 Starting Railway Backend Environment Variable Setup for Blocker #3" -ForegroundColor Cyan
 Write-Host ""
@@ -106,11 +106,10 @@ Write-Host "✅ Set DEBUG=$Debug" -ForegroundColor Green
 Write-Host ""
 
 # Step 9: Set ALLOWED_ORIGINS variable
-$originsJson = $AllowedOrigins | ConvertTo-Json -Compress
 Write-Host "⚙️  Setting ALLOWED_ORIGINS with Vercel domains" -ForegroundColor Yellow
-railway variables set ALLOWED_ORIGINS $originsJson
+railway variables set ALLOWED_ORIGINS $AllowedOrigins
 Write-Host "✅ Set ALLOWED_ORIGINS=" -ForegroundColor Green
-Write-Host "   $originsJson"
+Write-Host "   $AllowedOrigins"
 
 Write-Host ""
 

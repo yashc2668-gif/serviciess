@@ -7,7 +7,18 @@ from pydantic import BaseModel, Field
 
 from app.schemas.common import ORMModel, TimestampedSchema
 
-DocumentEntityType = Literal["contract", "measurement", "ra_bill", "payment"]
+DocumentEntityType = Literal[
+    "contract",
+    "measurement",
+    "ra_bill",
+    "payment",
+    "vendor",
+    "company",
+    "labour_attendance",
+    "labour_bill",
+    "labour_advance",
+    "site_expense",
+]
 
 
 class DocumentCreate(BaseModel):

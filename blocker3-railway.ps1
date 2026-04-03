@@ -52,11 +52,8 @@ railway variables set ENVIRONMENT $Environment 2>&1 | Out-Null
 Write-Host "  Setting DEBUG=$Debug..." -ForegroundColor Gray
 railway variables set DEBUG $Debug 2>&1 | Out-Null
 
-# Set ALLOWED_ORIGINS
-$originsJson = '[' + `
-  '"https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app",' + `
-  '"https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"' + `
-  ']'
+# Set ALLOWED_ORIGINS (PERFECT FORMAT - PRODUCTION)
+$originsJson = '["https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
 
 Write-Host "  Setting ALLOWED_ORIGINS..." -ForegroundColor Gray
 railway variables set ALLOWED_ORIGINS $originsJson 2>&1 | Out-Null

@@ -150,6 +150,9 @@ ROLE_PERMISSIONS = {
         "ra_bills:cancel",
         "ra_bills:finance_hold",
         "payments:read",
+        "site_expenses:create",
+        "site_expenses:read",
+        "site_expenses:update",
         "audit_logs:read",
         "workflows:read",
     },
@@ -219,6 +222,9 @@ ROLE_PERMISSIONS = {
         "work_done:read",
         "ra_bills:read",
         "payments:read",
+        "site_expenses:create",
+        "site_expenses:read",
+        "site_expenses:update",
         "workflows:read",
     },
     "accountant": {
@@ -269,6 +275,11 @@ ROLE_PERMISSIONS = {
         "payments:approve",
         "payments:release",
         "payments:allocate",
+        "site_expenses:create",
+        "site_expenses:read",
+        "site_expenses:update",
+        "site_expenses:approve",
+        "site_expenses:pay",
         "audit_logs:read",
         "workflows:read",
     },
@@ -298,6 +309,7 @@ ROLE_PERMISSIONS = {
         "work_done:read",
         "ra_bills:read",
         "payments:read",
+        "site_expenses:read",
     },
     "viewer": {
         "dashboard:read",
@@ -325,6 +337,7 @@ ROLE_PERMISSIONS = {
         "work_done:read",
         "ra_bills:read",
         "payments:read",
+        "site_expenses:read",
     },
 }
 

@@ -22,6 +22,10 @@ from app.models.boq import BOQItem
 from app.models.company import Company
 from app.models.contract import Contract
 from app.models.inventory_transaction import InventoryTransaction
+from app.models.labour_advance import LabourAdvance
+from app.models.labour_attendance import LabourAttendance
+from app.models.labour_bill import LabourBill
+from app.models.labour_contractor import LabourContractor
 from app.models.material import Material
 from app.models.measurement import Measurement
 from app.models.measurement_item import MeasurementItem
@@ -2716,6 +2720,235 @@ class ApiIntegrationTests(unittest.TestCase):
         self.assertIn("File size exceeds", oversize.text)
         self.assertIn("X-Request-ID", oversize.headers)
         self.assertEqual(oversize.json()["error"]["type"], "validation_error")
+
+    def test_vendor_and_company_quotations_work_through_documents_api(self):
+        headers = self.admin_headers()
+
+        vendor_upload = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "vendor",
+                "entity_id": self.vendor.id,
+                "title": "Marco Vendor Quotation",
+                "document_type": "quotation",
+                "remarks": "Initial vendor quote",
+            },
+            files={"file": ("vendor quotation.pdf", b"vendor quote v1", "application/pdf")},
+        )
+        self.assertEqual(vendor_upload.status_code, 201, vendor_upload.text)
+        vendor_document = vendor_upload.json()
+        self.assertEqual(vendor_document["entity_type"], "vendor")
+        self.assertEqual(vendor_document["document_type"], "quotation")
+        self.assertRegex(
+            vendor_document["latest_file_path"],
+            r"^documents/vendor/\d+/[0-9a-f-]{36}/v1/\d{14}_[0-9a-f]{32}\.pdf$",
+        )
+
+        vendor_version = self.client.post(
+            f"/api/v1/documents/{vendor_document['id']}/versions/upload",
+            headers=headers,
+            data={"remarks": "Revision A"},
+            files={"file": ("vendor quotation rev-a.pdf", b"vendor quote v2", "application/pdf")},
+        )
+        self.assertEqual(vendor_version.status_code, 200, vendor_version.text)
+        self.assertEqual(vendor_version.json()["current_version_number"], 2)
+        self.assertEqual(vendor_version.json()["versions"][-1]["remarks"], "Revision A")
+
+        company_upload = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "company",
+                "entity_id": self.company.id,
+                "title": "Marco Company Quotation",
+                "document_type": "quotation",
+                "remarks": "Company-level pricing note",
+            },
+            files={"file": ("company quotation.pdf", b"company quote v1", "application/pdf")},
+        )
+        self.assertEqual(company_upload.status_code, 201, company_upload.text)
+        company_document = company_upload.json()
+        self.assertEqual(company_document["entity_type"], "company")
+        self.assertEqual(company_document["document_type"], "quotation")
+        self.assertRegex(
+            company_document["latest_file_path"],
+            r"^documents/company/\d+/[0-9a-f-]{36}/v1/\d{14}_[0-9a-f]{32}\.pdf$",
+        )
+
+        invalid_vendor = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "vendor",
+                "entity_id": 999999,
+                "title": "Missing Vendor Quote",
+                "document_type": "quotation",
+            },
+            files={"file": ("missing-vendor.pdf", b"missing", "application/pdf")},
+        )
+        self.assertEqual(invalid_vendor.status_code, 404)
+
+        invalid_company = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "company",
+                "entity_id": 999999,
+                "title": "Missing Company Quote",
+                "document_type": "quotation",
+            },
+            files={"file": ("missing-company.pdf", b"missing", "application/pdf")},
+        )
+        self.assertEqual(invalid_company.status_code, 404)
+
+    def test_labour_workflow_documents_upload_through_api(self):
+        headers = self.admin_headers()
+
+        contractor = LabourContractor(
+            company_id=self.company.id,
+            contractor_code="LCTR-DOC-001",
+            contractor_name="Departmental LBR",
+            contact_person="Muster Supervisor",
+            phone="9999999999",
+        )
+        self.db.add(contractor)
+        self.db.flush()
+
+        attendance = LabourAttendance(
+            muster_no="MST-DOC-001",
+            project_id=self.project.id,
+            contractor_id=contractor.id,
+            date=date(2026, 4, 3),
+            attendance_date=date(2026, 4, 3),
+            marked_by=self.admin_user.id,
+            status="approved",
+            total_wage=Decimal("12000.00"),
+        )
+        bill = LabourBill(
+            bill_no="LB-DOC-001",
+            project_id=self.project.id,
+            contract_id=self.contract.id,
+            contractor_id=contractor.id,
+            period_start=date(2026, 4, 1),
+            period_end=date(2026, 4, 3),
+            status="approved",
+            gross_amount=Decimal("12000.00"),
+            deductions=Decimal("0.00"),
+            net_amount=Decimal("12000.00"),
+            net_payable=Decimal("12000.00"),
+        )
+        advance = LabourAdvance(
+            advance_no="ADV-DOC-001",
+            project_id=self.project.id,
+            contractor_id=contractor.id,
+            advance_date=date(2026, 4, 3),
+            amount=Decimal("3000.00"),
+            recovered_amount=Decimal("0.00"),
+            balance_amount=Decimal("3000.00"),
+            status="active",
+        )
+        self.db.add_all([attendance, bill, advance])
+        self.db.commit()
+        self.db.refresh(attendance)
+        self.db.refresh(bill)
+        self.db.refresh(advance)
+
+        attendance_upload = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "labour_attendance",
+                "entity_id": attendance.id,
+                "title": "April Muster Sheet",
+                "document_type": "attendance_sheet",
+            },
+            files={"file": ("attendance-sheet.pdf", b"attendance", "application/pdf")},
+        )
+        self.assertEqual(attendance_upload.status_code, 201, attendance_upload.text)
+        self.assertEqual(attendance_upload.json()["entity_type"], "labour_attendance")
+
+        bill_upload = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "labour_bill",
+                "entity_id": bill.id,
+                "title": "April Labour Bill Sheet",
+                "document_type": "labour_bill_sheet",
+            },
+            files={"file": ("labour-bill-sheet.pdf", b"bill", "application/pdf")},
+        )
+        self.assertEqual(bill_upload.status_code, 201, bill_upload.text)
+        bill_document = bill_upload.json()
+        self.assertEqual(bill_document["entity_type"], "labour_bill")
+        self.assertRegex(
+            bill_document["latest_file_path"],
+            r"^documents/labour_bill/\d+/[0-9a-f-]{36}/v1/\d{14}_[0-9a-f]{32}\.pdf$",
+        )
+
+        bill_version = self.client.post(
+            f"/api/v1/documents/{bill_document['id']}/versions/upload",
+            headers=headers,
+            data={"remarks": "Revision A"},
+            files={"file": ("labour-bill-sheet-rev-a.pdf", b"bill-v2", "application/pdf")},
+        )
+        self.assertEqual(bill_version.status_code, 200, bill_version.text)
+        self.assertEqual(bill_version.json()["current_version_number"], 2)
+
+        advance_upload = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "labour_advance",
+                "entity_id": advance.id,
+                "title": "Food Advance Register",
+                "document_type": "labour_advance_sheet",
+            },
+            files={"file": ("food-advance.pdf", b"advance", "application/pdf")},
+        )
+        self.assertEqual(advance_upload.status_code, 201, advance_upload.text)
+        self.assertEqual(advance_upload.json()["entity_type"], "labour_advance")
+
+        missing_attendance = self.client.post(
+            "/api/v1/documents/upload",
+            headers=headers,
+            data={
+                "entity_type": "labour_attendance",
+                "entity_id": 999999,
+                "title": "Missing Attendance",
+                "document_type": "attendance_sheet",
+            },
+            files={"file": ("missing-attendance.pdf", b"missing", "application/pdf")},
+        )
+        self.assertEqual(missing_attendance.status_code, 404)
+
+        quotation_list = self.client.get(
+            "/api/v1/documents/?document_type=quotation",
+            headers=headers,
+        )
+        self.assertEqual(quotation_list.status_code, 200, quotation_list.text)
+        quotation_items = quotation_list.json()["items"]
+        self.assertEqual(len(quotation_items), 2)
+        self.assertEqual(
+            {item["entity_type"] for item in quotation_items},
+            {"vendor", "company"},
+        )
+
+        vendor_only = self.client.get(
+            "/api/v1/documents/?document_type=quotation&entity_type=vendor",
+            headers=headers,
+        )
+        self.assertEqual(vendor_only.status_code, 200, vendor_only.text)
+        self.assertEqual(vendor_only.json()["total"], 1)
+        self.assertEqual(vendor_only.json()["items"][0]["title"], "Marco Vendor Quotation")
+
+        export_response = self.client.get(
+            "/api/v1/documents/export?document_type=quotation&entity_type=company",
+            headers=headers,
+        )
+        self.assertEqual(export_response.status_code, 200, export_response.text)
+        self.assertIn("Marco Company Quotation", export_response.text)
 
     def test_step3_user_delete_soft_deactivates_and_blocks_login(self):
         removable_user = User(

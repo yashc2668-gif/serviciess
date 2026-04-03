@@ -28,9 +28,9 @@ Look for the variable named: `ALLOWED_ORIGINS`
 2. Click "New Variable"
 3. Enter:
    - **Name**: `ALLOWED_ORIGINS`
-   - **Value**: Copy exactly this (with quotes):
+   - **Value**: Copy exactly this (no spaces, perfect format):
 ```
-["https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]
+["http://localhost:5173","https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]
 ```
 
 ### Step 6: Save
@@ -55,7 +55,8 @@ railway link
 Then:
 
 ```powershell
-railway variables set ALLOWED_ORIGINS '["https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
+# Perfect Format - PRODUCTION (No localhost!)
+railway variables set ALLOWED_ORIGINS='["https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
 ```
 
 ---

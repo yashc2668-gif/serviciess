@@ -49,8 +49,8 @@ railway variables set ENVIRONMENT production
 # Set DEBUG
 railway variables set DEBUG False
 
-# Set ALLOWED_ORIGINS
-railway variables set ALLOWED_ORIGINS '["https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
+# Set ALLOWED_ORIGINS (PRODUCTION - No localhost!)
+railway variables set ALLOWED_ORIGINS='["https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]'
 ```
 
 **What happens:**

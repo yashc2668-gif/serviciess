@@ -33,6 +33,7 @@ from app.api.v1.endpoints.projects import router as projects_router
 from app.api.v1.endpoints.ra_bills import router as ra_bills_router
 from app.api.v1.endpoints.reports import router as reports_router
 from app.api.v1.endpoints.secured_advances import router as secured_advances_router
+from app.api.v1.endpoints.site_expenses import router as site_expenses_router
 from app.api.v1.endpoints.stock_adjustments import router as stock_adjustments_router
 from app.api.v1.endpoints.stock_ledger import router as stock_ledger_router
 from app.api.v1.endpoints.users import router as users_router
@@ -82,5 +83,6 @@ for router in (
     financial_archives_router,
     secured_advances_router,
     payments_router,
+    site_expenses_router,
 ):
     api_router.include_router(router)
