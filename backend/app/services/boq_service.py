@@ -56,6 +56,7 @@ def list_boq_items_by_contract(
     db: Session,
     contract_id: int,
     *,
+    current_user: User | None = None,
     pagination: PaginationParams,
 ) -> dict[str, object]:
     _get_contract_or_404(db, contract_id)

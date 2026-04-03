@@ -14,7 +14,10 @@ class Document(Base):
         String(50),
         nullable=False,
         index=True,
-        comment="contract | measurement | ra_bill | payment",
+        comment=(
+            "contract | measurement | ra_bill | payment | vendor | company | "
+            "labour_attendance | labour_bill | labour_advance"
+        ),
     )
     entity_id = Column(Integer, nullable=False, index=True)
     storage_key = Column(String(36), nullable=False, index=True)

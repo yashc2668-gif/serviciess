@@ -11,10 +11,21 @@ from sqlalchemy.orm import Query, Session
 from sqlalchemy.orm.exc import StaleDataError
 
 
+def _resolve_lock_target(query: Query):
+    column_descriptions = getattr(query, "column_descriptions", None) or []
+    if not column_descriptions:
+        return None
+    return column_descriptions[0].get("entity")
+
+
 def apply_write_lock(query: Query, db: Session) -> Query:
     bind = db.get_bind()
     if bind is None or bind.dialect.name == "sqlite":
         return query
+    if bind.dialect.name == "postgresql":
+        lock_target = _resolve_lock_target(query)
+        if lock_target is not None:
+            return query.with_for_update(of=lock_target)
     return query.with_for_update()
 
 

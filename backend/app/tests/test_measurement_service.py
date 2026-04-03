@@ -51,6 +51,7 @@ class MeasurementServiceTests(OperationsDbTestCase):
         fetched = get_measurement_or_404(self.db, created.id)
         listed = list_measurements(
             self.db,
+            current_user=self.user,
             contract_id=self.contract.id,
             status_filter="draft",
             pagination=PaginationParams(page=1, limit=20, skip=0),

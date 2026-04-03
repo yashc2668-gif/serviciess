@@ -37,6 +37,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 def list_all_documents(
     entity_type: str | None = None,
     entity_id: int | None = None,
+    document_type: str | None = None,
     search: str | None = None,
     pagination: PaginationParams = Depends(get_pagination_params),
     sorting: SortParams = Depends(get_sort_params),
@@ -47,6 +48,7 @@ def list_all_documents(
         db,
         entity_type=entity_type,
         entity_id=entity_id,
+        document_type=document_type,
         search=search,
         pagination=pagination,
         sort_by=sorting.sort_by,
@@ -58,6 +60,7 @@ def list_all_documents(
 def export_documents(
     entity_type: str | None = None,
     entity_id: int | None = None,
+    document_type: str | None = None,
     search: str | None = None,
     sorting: SortParams = Depends(get_sort_params),
     db: Session = Depends(get_db),
@@ -67,6 +70,7 @@ def export_documents(
         db,
         entity_type=entity_type,
         entity_id=entity_id,
+        document_type=document_type,
         search=search,
         sort_by=sorting.sort_by,
         sort_dir=sorting.sort_dir,

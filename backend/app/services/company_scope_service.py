@@ -22,6 +22,7 @@ from app.models.payment import Payment
 from app.models.project import Project
 from app.models.ra_bill import RABill
 from app.models.secured_advance import SecuredAdvance
+from app.models.site_expense import SiteExpense
 from app.models.user import User
 from app.models.vendor import Vendor
 
@@ -172,3 +173,7 @@ def apply_material_requisition_company_scope(query: Query, company_id: int | Non
 
 def apply_material_stock_adjustment_company_scope(query: Query, company_id: int | None) -> Query:
     return _apply_project_based_scope(query, MaterialStockAdjustment, company_id)
+
+
+def apply_site_expense_company_scope(query: Query, company_id: int | None) -> Query:
+    return _apply_project_based_scope(query, SiteExpense, company_id)

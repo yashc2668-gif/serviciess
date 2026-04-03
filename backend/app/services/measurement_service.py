@@ -63,6 +63,7 @@ def get_measurement_or_404(db: Session, measurement_id: int) -> Measurement:
 
 def list_measurements(
     db: Session,
+    current_user: User | None = None,
     contract_id: int | None = None,
     status_filter: str | None = None,
     *,

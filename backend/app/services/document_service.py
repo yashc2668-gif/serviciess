@@ -14,10 +14,16 @@ from app.integrations.storage import get_storage_adapter
 from app.models.contract import Contract
 from app.models.document import Document
 from app.models.document_version import DocumentVersion
+from app.models.labour_advance import LabourAdvance
+from app.models.labour_attendance import LabourAttendance
+from app.models.labour_bill import LabourBill
 from app.models.measurement import Measurement
 from app.models.payment import Payment
 from app.models.ra_bill import RABill
+from app.models.company import Company
+from app.models.site_expense import SiteExpense
 from app.models.user import User
+from app.models.vendor import Vendor
 from app.schemas.document import (
     DocumentCreate,
     DocumentUpdate,
@@ -34,6 +40,12 @@ SUPPORTED_DOCUMENT_ENTITY_MODELS = {
     "measurement": Measurement,
     "ra_bill": RABill,
     "payment": Payment,
+    "vendor": Vendor,
+    "company": Company,
+    "labour_attendance": LabourAttendance,
+    "labour_bill": LabourBill,
+    "labour_advance": LabourAdvance,
+    "site_expense": SiteExpense,
 }
 
 
@@ -74,6 +86,7 @@ def _document_list_query(
     *,
     entity_type: str | None = None,
     entity_id: int | None = None,
+    document_type: str | None = None,
     search: str | None = None,
 ):
     query = _document_query(db)
@@ -81,6 +94,8 @@ def _document_list_query(
         query = query.filter(Document.entity_type == entity_type)
     if entity_id is not None:
         query = query.filter(Document.entity_id == entity_id)
+    if document_type is not None:
+        query = query.filter(Document.document_type == document_type)
     if search:
         search_term = f"%{search.strip()}%"
         query = query.filter(
@@ -195,6 +210,7 @@ def list_documents(
     *,
     entity_type: str | None = None,
     entity_id: int | None = None,
+    document_type: str | None = None,
     search: str | None = None,
     pagination: PaginationParams,
     sort_by: str | None = None,
@@ -204,6 +220,7 @@ def list_documents(
         db,
         entity_type=entity_type,
         entity_id=entity_id,
+        document_type=document_type,
         search=search,
     )
     return paginate_query(
@@ -223,6 +240,7 @@ def list_documents_for_export(
     *,
     entity_type: str | None = None,
     entity_id: int | None = None,
+    document_type: str | None = None,
     search: str | None = None,
     sort_by: str | None = None,
     sort_dir: SortDirection = SortDirection.ASC,
@@ -231,6 +249,7 @@ def list_documents_for_export(
         db,
         entity_type=entity_type,
         entity_id=entity_id,
+        document_type=document_type,
         search=search,
     )
     return apply_sorting(

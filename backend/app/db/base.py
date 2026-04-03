@@ -43,6 +43,7 @@ from app.models.refresh_token_session import RefreshTokenSession
 from app.models.role import Role
 from app.models.secured_advance import SecuredAdvance
 from app.models.secured_advance_recovery import SecuredAdvanceRecovery
+from app.models.site_expense import SiteExpense
 from app.models.user import User
 from app.models.vendor import Vendor
 from app.models.work_done import WorkDoneItem
@@ -94,4 +95,5 @@ __all__ = [
     "WorkDoneItem",
     "SecuredAdvance",
     "SecuredAdvanceRecovery",
+    "SiteExpense",
 ]

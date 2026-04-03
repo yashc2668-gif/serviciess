@@ -42,6 +42,7 @@ from app.models.refresh_token_session import RefreshTokenSession  # noqa: F401
 from app.models.role import Role  # noqa: F401
 from app.models.secured_advance import SecuredAdvance  # noqa: F401
 from app.models.secured_advance_recovery import SecuredAdvanceRecovery  # noqa: F401
+from app.models.site_expense import SiteExpense  # noqa: F401
 from app.models.user import User  # noqa: F401
 from app.models.vendor import Vendor  # noqa: F401
 from app.models.work_done import WorkDoneItem  # noqa: F401
