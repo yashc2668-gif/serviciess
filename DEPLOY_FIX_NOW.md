@@ -26,9 +26,9 @@ Click "+ New Variable"
 
 **Name**: `ALLOWED_ORIGINS`
 
-**Value**: Copy-paste exactly this:
+**Value**: Copy-paste exactly this (NO localhost in production!):
 ```
-https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app,https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app,http://localhost:5173
+["https://m2n-frontend.vercel.app","https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app","https://m2n-frontend-jel4ixehf-yashs-projects-8e52d41e.vercel.app"]
 ```
 
 ### Step 3: Save

@@ -42,3 +42,6 @@ backend/.coverage
 backend/.coverage.*
 backend/coverage.xml
 backend/htmlcov/
+
+.vercel
+.env*.local
