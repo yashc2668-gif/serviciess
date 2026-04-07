@@ -1,6 +1,6 @@
 """Material requisition item model."""
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, Numeric, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, Numeric, String, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -9,11 +9,7 @@ from app.db.base_class import Base
 class MaterialRequisitionItem(Base):
     __tablename__ = "material_requisition_items"
     __table_args__ = (
-        UniqueConstraint(
-            "requisition_id",
-            "material_id",
-            name="uq_material_requisition_items_requisition_material",
-        ),
+        # Unique constraint removed to allow multiple manual entries
         CheckConstraint(
             "requested_qty > 0",
             name="ck_material_requisition_items_requested_qty_positive",
@@ -43,7 +39,8 @@ class MaterialRequisitionItem(Base):
         nullable=False,
         index=True,
     )
-    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False, index=True)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=True, index=True)
+    custom_material_name = Column(String(255), nullable=True)
     requested_qty = Column(Numeric(14, 3), nullable=False, default=0)
     approved_qty = Column(Numeric(14, 3), nullable=False, default=0)
     issued_qty = Column(Numeric(14, 3), nullable=False, default=0)

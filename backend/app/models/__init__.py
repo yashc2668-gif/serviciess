@@ -1,6 +1,7 @@
 """Central model registry for the current ready schema."""
 
 from app.models.audit_log import AuditLog  # noqa: F401
+from app.models.bar_bending_schedule import BarBendingSchedule  # noqa: F401
 from app.models.boq import BOQItem  # noqa: F401
 from app.models.company import Company  # noqa: F401
 from app.models.contract import Contract  # noqa: F401

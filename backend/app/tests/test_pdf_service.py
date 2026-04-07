@@ -145,6 +145,59 @@ class PDFServiceTests(unittest.TestCase):
         self.assertGreater(len(measurement_pdf), 1400)
         self.assertGreater(len(labour_pdf), 1400)
 
+    def test_generate_contract_work_order_pdf_renders_manual_sections(self):
+        work_order = SimpleNamespace(
+            issuer_name="Omaxe Pancham Realcon Pvt. Ltd.",
+            issuer_address="Lucknow Head Office",
+            issuer_gst_number="09ABCDE1234F1Z5",
+            issuer_contact="accounts@omaxe.com",
+            recipient_label="Issued To",
+            recipient_name="MARCO Enterprises",
+            recipient_address="Noida, Uttar Pradesh",
+            work_order_no="OPRL/OS2/11094103917",
+            work_order_date=date(2026, 4, 6),
+            project_name="Omaxe Shiva Phase-2 (GH-2)",
+            project_location="Sangam City, Prayagraj, Uttar Pradesh",
+            title="Civil Structure Work",
+            subject="Award of civil structure work",
+            scope_of_work="Complete civil structure package including shuttering, reinforcement, and concrete works.",
+            start_date=date(2026, 5, 1),
+            end_date=date(2027, 8, 31),
+            original_value=Decimal("162074375"),
+            revised_value=Decimal("162074375"),
+            retention_percentage=Decimal("0"),
+            payment_terms="Certified RA bills to be released within agreed cycle.",
+            special_conditions="All work must follow issued drawings and QA checks.",
+            signatory_name="Authorised Signatory",
+            signatory_designation="Project Director",
+        )
+        contract = SimpleNamespace(
+            contract_no="OPRL/OS2/11094103917",
+            title="Civil Structure Work",
+            contract_type="client_contract",
+            scope_of_work="Civil structure work",
+        )
+        project = SimpleNamespace(
+            name="Omaxe Shiva Phase-2 (GH-2)",
+            location="Sangam City, Prayagraj, Uttar Pradesh",
+        )
+        company = SimpleNamespace(
+            name="MARCO Enterprises",
+            gst_number="09BLDPK5228H1Z2",
+            phone="9910041120",
+        )
+
+        rendered = pdf_service.generate_contract_work_order_pdf(
+            work_order,
+            contract=contract,
+            project=project,
+            company=company,
+            vendor=None,
+        )
+
+        self.assertTrue(rendered.startswith(b"%PDF"))
+        self.assertGreater(len(rendered), 1800)
+
 
 if __name__ == "__main__":
     unittest.main()

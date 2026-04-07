@@ -1,0 +1,46 @@
+
+> frontend@0.1.0 dev
+> vite --configLoader native --host 127.0.0.1 --port 5173
+
+[2m10:19:02 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v8.0.3[39m  [2mready in [0m[1m1358[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
+[2m10:23:14 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m10:23:18 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m10:23:24 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m10:33:27 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m10:40:48 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m11:10:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m11:15:14 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m11:21:02 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m11:24:12 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/material-requisitions/material-requisitions-page.tsx, /src/styles/index.css[22m
+[2m11:26:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/index.css, /src/features/material-requisitions/material-requisitions-page.tsx, /src/features/materials/materials-page.tsx[22m
+[2m1:39:58 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:40:04 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/index.css, /src/features/material-requisitions/material-requisitions-page.tsx, /src/features/materials/materials-page.tsx[22m
+[2m1:41:53 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/index.css, /src/features/material-requisitions/material-requisitions-page.tsx, /src/features/materials/materials-page.tsx[22m
+[2m1:41:57 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/index.css, /src/features/material-requisitions/material-requisitions-page.tsx, /src/features/materials/materials-page.tsx[22m
+[2m1:42:09 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:42:18 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:42:26 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:42:31 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:42:44 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:42:57 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m1:43:28 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:38:51 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:38:58 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:39:21 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:40:25 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:40:34 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:40:44 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:43:47 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:43:47 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles/index.css, /src/features/material-requisitions/material-requisitions-page.tsx, /src/features/materials/materials-page.tsx[22m
+[2m2:44:34 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:44:59 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m2:49:44 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m6:54:07 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m6:55:14 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m6:55:28 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m6:56:07 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m
+[2m6:56:54 am[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/features/materials/materials-page.tsx, /src/styles/index.css[22m

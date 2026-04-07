@@ -21,6 +21,7 @@ class ModuleBuildOrderTests(unittest.TestCase):
             "/labour-bills",
             "/labour-advances",
             "/contracts/{contract_id}/boq-items",
+            "/bbs",
             "/measurements",
             "/work-done",
             "/ra-bills",

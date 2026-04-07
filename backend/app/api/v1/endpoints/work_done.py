@@ -24,7 +24,6 @@ def list_all_work_done(
 ):
     return list_work_done(
         db,
-        current_user=current_user,
         contract_id=contract_id,
         measurement_id=measurement_id,
         pagination=pagination,

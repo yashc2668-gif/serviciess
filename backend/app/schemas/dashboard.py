@@ -127,7 +127,7 @@ class ContractDashboardOut(BaseModel):
     company_name: str
     project_name: str
     project_code: str | None = None
-    vendor_id: int
+    vendor_id: int | None
     vendor_name: str
     contract_no: str
     contract_title: str

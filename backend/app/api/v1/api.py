@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints.ai_boundary import router as ai_boundary_router
 from app.api.v1.endpoints.audit_logs import router as audit_logs_router
 from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.bbs import router as bbs_router
 from app.api.v1.endpoints.boq import router as boq_router
 from app.api.v1.endpoints.companies import router as companies_router
 from app.api.v1.endpoints.contracts import router as contracts_router
@@ -39,6 +40,7 @@ from app.api.v1.endpoints.users import router as users_router
 from app.api.v1.endpoints.vendors import router as vendors_router
 from app.api.v1.endpoints.work_done import router as work_done_router
 from app.api.v1.endpoints.workflows import router as workflows_router
+from app.api.v1.endpoints.work_orders import router as work_orders_router
 
 api_router = APIRouter()
 
@@ -75,6 +77,7 @@ for router in (
     labour_advances_router,
     # Finance / RA bill / payment linkages
     boq_router,
+    bbs_router,
     measurements_router,
     work_done_router,
     deductions_router,
@@ -82,5 +85,6 @@ for router in (
     financial_archives_router,
     secured_advances_router,
     payments_router,
+    work_orders_router,
 ):
     api_router.include_router(router)

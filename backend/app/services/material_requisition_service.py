@@ -145,7 +145,9 @@ def _ensure_user_exists(db: Session, user_id: int) -> None:
         )
 
 
-def _ensure_material_exists_for_project(db: Session, material_id: int, project_id: int) -> None:
+def _ensure_material_exists_for_project(db: Session, material_id: int | None, project_id: int) -> None:
+    if material_id is None:
+        return
     material = db.query(Material).filter(Material.id == material_id).first()
     if not material:
         raise HTTPException(
@@ -364,14 +366,27 @@ def create_material_requisition(
 
     raw_items = data.pop("items")
     material_ids: set[int] = set()
+    custom_names: set[str] = set()
     for item in raw_items:
-        material_id = item["material_id"]
-        if material_id in material_ids:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Duplicate material_id in items: {material_id}",
-            )
-        material_ids.add(material_id)
+        material_id = item.get("material_id")
+        custom_name = item.get("custom_material_name")
+        
+        if material_id is not None:
+            if material_id in material_ids:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Duplicate material_id in items: {material_id}",
+                )
+            material_ids.add(material_id)
+        elif custom_name:
+            normalized_name = custom_name.strip().lower()
+            if normalized_name in custom_names:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Duplicate custom material name in items: {custom_name}",
+                )
+            custom_names.add(normalized_name)
+        
         _ensure_material_exists_for_project(db, material_id, data["project_id"])
         _validate_qty(
             requested_qty=float(item["requested_qty"]),
@@ -387,7 +402,8 @@ def create_material_requisition(
     for item in raw_items:
         requisition_item = MaterialRequisitionItem(
             requisition_id=requisition.id,
-            material_id=item["material_id"],
+            material_id=item.get("material_id"),
+            custom_material_name=item.get("custom_material_name"),
             requested_qty=item["requested_qty"],
             approved_qty=item.get("approved_qty", 0),
             issued_qty=item.get("issued_qty", 0),
@@ -570,3 +586,45 @@ def reject_material_requisition(
         current_user=current_user,
         remarks=remarks,
     )
+
+
+def delete_material_requisition(
+    db: Session,
+    requisition_id: int,
+    current_user: User,
+) -> None:
+    requisition = get_material_requisition_or_404(db, requisition_id)
+    
+    # Only allow deleting draft or rejected requisitions
+    if requisition.status not in {"draft", "rejected"}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot delete requisition with status '{requisition.status}'. Only draft or rejected requisitions can be deleted.",
+        )
+    
+    # Only allow creator or admin to delete
+    if requisition.requested_by != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the creator or admin can delete this requisition.",
+        )
+    
+    # Store data for audit before deletion
+    before_data = _serialize_requisition(requisition)
+    requisition_no = requisition.requisition_no
+    
+    # Delete the requisition (cascade will delete items)
+    db.delete(requisition)
+    flush_with_conflict_handling(db, entity_name="Material requisition")
+    
+    log_audit_event(
+        db,
+        entity_type="material_requisition",
+        entity_id=requisition_id,
+        action="delete",
+        performed_by=current_user,
+        before_data=before_data,
+        after_data=None,
+        remarks=requisition_no,
+    )
+    commit_with_conflict_handling(db, entity_name="Material requisition")

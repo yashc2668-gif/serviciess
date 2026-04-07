@@ -31,6 +31,11 @@ def sanitize_filename(filename: str) -> str:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uploaded file must have a valid file name",
         )
+    if raw_name.startswith("~$"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Temporary Office files cannot be uploaded",
+        )
     sanitized = _SAFE_FILENAME_CHARS.sub("_", raw_name).strip("._")
     if not sanitized:
         raise HTTPException(

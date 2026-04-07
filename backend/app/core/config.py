@@ -15,17 +15,17 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "m2n_db"
-    POSTGRES_USER: str = "m2n_app"
-    POSTGRES_PASSWORD: str = "m2n_app_123"
+    POSTGRES_DB: str = "marco_db"
+    POSTGRES_USER: str = "marco_app"
+    POSTGRES_PASSWORD: str = "marco_app_123"
 
     # JWT
     SECRET_KEY: str = "CHANGE-ME"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    REFRESH_TOKEN_COOKIE_NAME: str = "m2n_refresh_token"
-    CSRF_COOKIE_NAME: str = "m2n_csrf_token"
+    REFRESH_TOKEN_COOKIE_NAME: str = "marco_refresh_token"
+    CSRF_COOKIE_NAME: str = "marco_csrf_token"
     CSRF_HEADER_NAME: str = "X-CSRF-Token"
     AUTH_COOKIE_SAMESITE: str = "lax"
     AUTH_COOKIE_SECURE: bool = False
@@ -44,11 +44,11 @@ class Settings(BaseSettings):
     PASSWORD_REQUIRE_SPECIAL: bool = True
     PASSWORD_RESET_OTP_EXPIRE_MINUTES: int = 10
     PASSWORD_RESET_OTP_LENGTH: int = 6
-    EMAIL_SENDER: str = "no-reply@m2n.local"
-    PASSWORD_RESET_EMAIL_SUBJECT: str = "Your M2N password reset code"
+    EMAIL_SENDER: str = "no-reply@marcoenterprises.local"
+    PASSWORD_RESET_EMAIL_SUBJECT: str = "Your Marco Enterprises password reset code"
 
     # App
-    PROJECT_NAME: str = "M2N Construction ERP"
+    PROJECT_NAME: str = "Marco Enterprises Construction ERP"
     ENVIRONMENT: str = "development"
     DEBUG: bool = False
     APP_PORT: int = 8000

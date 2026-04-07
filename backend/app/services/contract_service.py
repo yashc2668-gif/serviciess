@@ -9,7 +9,7 @@ from app.models.contract import Contract
 from app.models.project import Project
 from app.models.user import User
 from app.models.vendor import Vendor
-from app.schemas.contract import ContractCreate, ContractUpdate
+from app.schemas.contract import ContractCreate, ContractUpdate, ContractWorkOrderDraft
 from app.services.audit_service import log_audit_event, serialize_model
 from app.services.company_scope_service import (
     apply_contract_company_scope,
@@ -23,6 +23,13 @@ from app.services.concurrency_service import (
     flush_with_conflict_handling,
 )
 from app.utils.pagination import PaginationParams, paginate_query
+
+
+def _normalize_optional_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    cleaned = value.strip()
+    return cleaned or None
 
 
 def _get_project_or_404(
@@ -72,13 +79,52 @@ def _ensure_contract_no_unique(db: Session, contract_no: str) -> None:
         )
 
 
+def _validate_contract_counterparty(
+    db: Session,
+    *,
+    project: Project,
+    contract_type: str,
+    client_name: str | None,
+    vendor_id: int | None,
+) -> None:
+    if contract_type == "client_contract":
+        if not _normalize_optional_text(client_name):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Client name is required for client contracts",
+            )
+        if vendor_id is not None:
+            _get_vendor_or_404(db, vendor_id, company_id=project.company_id)
+        return
+
+    if contract_type != "vendor_contract":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported contract type",
+        )
+    if vendor_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vendor is required for vendor contracts",
+        )
+    _get_vendor_or_404(db, vendor_id, company_id=project.company_id)
+
+
 def create_contract(db: Session, payload: ContractCreate, current_user: User) -> Contract:
     company_id = resolve_company_scope(current_user)
     project = _get_project_or_404(db, payload.project_id, company_id=company_id)
-    _get_vendor_or_404(db, payload.vendor_id, company_id=project.company_id)
     _ensure_contract_no_unique(db, payload.contract_no)
+    _validate_contract_counterparty(
+        db,
+        project=project,
+        contract_type=payload.contract_type,
+        client_name=payload.client_name,
+        vendor_id=payload.vendor_id,
+    )
 
-    contract = Contract(**payload.model_dump())
+    payload_data = payload.model_dump()
+    payload_data["client_name"] = _normalize_optional_text(payload_data.get("client_name"))
+    contract = Contract(**payload_data)
     db.add(contract)
     flush_with_conflict_handling(db, entity_name="Contract")
     log_audit_event(
@@ -151,10 +197,21 @@ def update_contract(
         entity_name="Contract",
     )
     company_id = resolve_company_scope(current_user)
-    if "vendor_id" in updates and updates["vendor_id"] is not None:
-        _get_vendor_or_404(db, updates["vendor_id"], company_id=company_id)
+    project = _get_project_or_404(db, contract.project_id, company_id=company_id)
+    next_contract_type = updates.get("contract_type", contract.contract_type)
+    next_client_name = updates.get("client_name", contract.client_name)
+    next_vendor_id = updates.get("vendor_id", contract.vendor_id)
+    _validate_contract_counterparty(
+        db,
+        project=project,
+        contract_type=next_contract_type,
+        client_name=next_client_name,
+        vendor_id=next_vendor_id,
+    )
     if "contract_no" in updates and updates["contract_no"] != contract.contract_no:
         _ensure_contract_no_unique(db, updates["contract_no"])
+    if "client_name" in updates:
+        updates["client_name"] = _normalize_optional_text(updates["client_name"])
 
     before_data = serialize_model(contract)
     for field, value in updates.items():
@@ -169,6 +226,42 @@ def update_contract(
         performed_by=current_user,
         before_data=before_data,
         after_data=serialize_model(contract),
+    )
+    commit_with_conflict_handling(db, entity_name="Contract")
+    db.refresh(contract)
+    return contract
+
+
+def get_contract_work_order_draft(
+    db: Session,
+    contract_id: int,
+    *,
+    current_user: User,
+) -> dict | None:
+    contract = get_contract_or_404(db, contract_id, current_user=current_user)
+    return contract.work_order_draft
+
+
+def update_contract_work_order_draft(
+    db: Session,
+    contract_id: int,
+    payload: ContractWorkOrderDraft,
+    current_user: User,
+) -> Contract:
+    contract = get_contract_or_404(db, contract_id, current_user=current_user)
+    before_data = serialize_model(contract)
+    contract.work_order_draft = payload.model_dump(mode="json")
+    flush_with_conflict_handling(db, entity_name="Contract")
+
+    log_audit_event(
+        db,
+        entity_type="contract",
+        entity_id=contract.id,
+        action="update_work_order_draft",
+        performed_by=current_user,
+        before_data=before_data,
+        after_data=serialize_model(contract),
+        remarks=contract.contract_no,
     )
     commit_with_conflict_handling(db, entity_name="Contract")
     db.refresh(contract)

@@ -1,6 +1,6 @@
 """Document metadata endpoints."""
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -20,6 +20,7 @@ from app.services.document_service import (
     add_document_version_from_upload,
     create_document,
     create_document_from_upload,
+    delete_document,
     get_document_or_404,
     list_documents,
     list_documents_for_export,
@@ -172,6 +173,16 @@ def update_existing_document(
     _: User = Depends(require_permissions("documents:update")),
 ):
     return update_document_metadata(db, document_id, payload)
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_existing_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions("documents:delete")),
+):
+    delete_document(db, document_id, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{document_id}/versions", response_model=DocumentOut)

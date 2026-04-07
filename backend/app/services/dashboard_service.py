@@ -438,7 +438,7 @@ def get_contract_dashboard(db: Session, contract_id: int) -> ContractDashboardOu
         project_name=contract.project.name if contract.project else "",
         project_code=contract.project.code if contract.project else None,
         vendor_id=contract.vendor_id,
-        vendor_name=contract.vendor.name if contract.vendor else "",
+        vendor_name=contract.vendor.name if contract.vendor else (contract.client_name or "Client contract"),
         contract_no=contract.contract_no,
         contract_title=contract.title,
         status=contract.status,

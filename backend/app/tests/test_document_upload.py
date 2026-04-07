@@ -5,12 +5,14 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from fastapi import HTTPException
 from fastapi import UploadFile
 
 from app.core.config import settings
 from app.services.document_service import (
     add_document_version_from_upload,
     create_document_from_upload,
+    delete_document,
 )
 from app.tests.helpers import FinanceDbTestCase
 
@@ -75,4 +77,46 @@ class DocumentUploadRollbackTests(FinanceDbTestCase):
 
         remaining_files = self._stored_files()
         self.assertEqual(remaining_files, existing_files)
+
+    def test_delete_document_removes_versions_and_stored_files(self):
+        document = create_document_from_upload(
+            self.db,
+            entity_type="contract",
+            entity_id=self.contract.id,
+            title="Contract Scan",
+            document_type="scan",
+            remarks="initial",
+            upload=self._upload("contract.pdf", b"v1"),
+            current_user=self.user,
+        )
+        document = add_document_version_from_upload(
+            self.db,
+            document_id=document.id,
+            remarks="v2",
+            upload=self._upload("contract-v2.pdf", b"v2"),
+            current_user=self.user,
+        )
+
+        self.assertEqual(len(self._stored_files()), 2)
+
+        delete_document(self.db, document.id, self.user)
+
+        self.assertIsNone(self.db.query(type(document)).filter(type(document).id == document.id).first())
+        self.assertEqual(self._stored_files(), [])
+
+    def test_create_upload_rejects_temporary_office_file(self):
+        with self.assertRaises(HTTPException) as exc:
+            create_document_from_upload(
+                self.db,
+                entity_type="contract",
+                entity_id=self.contract.id,
+                title="Temp Workbook",
+                document_type="sheet",
+                remarks="temp",
+                upload=self._upload("~$contract.xlsx", b"temp"),
+                current_user=self.user,
+            )
+
+        self.assertEqual(exc.exception.status_code, 400)
+        self.assertIn("Temporary Office files", exc.exception.detail)
 

@@ -38,7 +38,6 @@ def list_contract_boq_items(
     return list_boq_items_by_contract(
         db,
         contract_id,
-        current_user=current_user,
         pagination=pagination,
     )
 

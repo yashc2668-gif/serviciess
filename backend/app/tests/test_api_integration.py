@@ -418,6 +418,85 @@ class ApiIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(invalid_boq.status_code, 422)
 
+    def test_contract_endpoint_allows_client_contract_without_vendor(self):
+        response = self.client.post(
+            "/api/v1/contracts/",
+            headers=self.admin_headers(),
+            json={
+                "project_id": self.project.id,
+                "contract_type": "client_contract",
+                "client_name": "Omaxe",
+                "contract_no": "API-CLIENT-CTR-001",
+                "title": "Main Client Contract",
+                "scope_of_work": "Main awarded work",
+                "original_value": 162074375,
+                "revised_value": 162074375,
+                "retention_percentage": 0,
+                "status": "active",
+            },
+        )
+        self.assertEqual(response.status_code, 201, response.text)
+        payload = response.json()
+        self.assertEqual(payload["contract_type"], "client_contract")
+        self.assertEqual(payload["client_name"], "Omaxe")
+        self.assertIsNone(payload["vendor_id"])
+
+    def test_contract_work_order_draft_can_be_saved_and_fetched(self):
+        payload = {
+            "work_order_draft": {
+                "issuer_name": "Omaxe Pancham Realcon Pvt. Ltd.",
+                "issuer_address": "Lucknow Head Office",
+                "issuer_gst_number": "09ABCDE1234F1Z5",
+                "issuer_contact": "accounts@omaxe.com",
+                "recipient_label": "Issued To",
+                "recipient_name": "MARCO Enterprises",
+                "recipient_address": "Noida, Uttar Pradesh",
+                "work_order_no": self.contract.contract_no,
+                "work_order_date": "2026-04-06",
+                "project_name": self.project.name,
+                "project_location": self.project.location,
+                "title": self.contract.title,
+                "subject": "Award of civil structure work",
+                "scope_of_work": "Main awarded work",
+                "start_date": "2026-05-01",
+                "end_date": "2027-08-31",
+                "original_value": 162074375,
+                "revised_value": 162074375,
+                "retention_percentage": 0,
+                "payment_terms": "Certified RA bills as per agreed cycle.",
+                "special_conditions": "Follow issued drawings and QA checks.",
+                "signatory_name": "Authorised Signatory",
+                "signatory_designation": "Project Director",
+            }
+        }
+
+        save_response = self.client.put(
+            f"/api/v1/contracts/{self.contract.id}/work-order",
+            headers=self.admin_headers(),
+            json=payload,
+        )
+        self.assertEqual(save_response.status_code, 200, save_response.text)
+        saved = save_response.json()
+        self.assertEqual(saved["work_order_draft"]["issuer_name"], payload["work_order_draft"]["issuer_name"])
+        self.assertEqual(saved["work_order_draft"]["subject"], payload["work_order_draft"]["subject"])
+
+        get_response = self.client.get(
+            f"/api/v1/contracts/{self.contract.id}/work-order",
+            headers=self.accountant_headers(),
+        )
+        self.assertEqual(get_response.status_code, 200, get_response.text)
+        fetched = get_response.json()
+        self.assertEqual(fetched["recipient_name"], payload["work_order_draft"]["recipient_name"])
+        self.assertEqual(fetched["work_order_no"], payload["work_order_draft"]["work_order_no"])
+
+        pdf_response = self.client.post(
+            f"/api/v1/contracts/{self.contract.id}/work-order/pdf",
+            headers=self.accountant_headers(),
+            json=payload["work_order_draft"],
+        )
+        self.assertEqual(pdf_response.status_code, 200, pdf_response.text)
+        self.assertEqual(pdf_response.headers["content-type"], "application/pdf")
+
     def test_material_master_endpoints_support_crud_filters_and_permissions(self):
         unauthorized = self.client.post(
             "/api/v1/materials/",
@@ -2524,6 +2603,29 @@ class ApiIntegrationTests(unittest.TestCase):
             'attachment; filename="payment_advice_v2.pdf"',
         )
         self.assertEqual(download_response.headers["content-type"], "application/pdf")
+
+        delete_response = self.client.delete(
+            f"/api/v1/documents/{document_id}",
+            headers=self.admin_headers(),
+        )
+        self.assertEqual(delete_response.status_code, 204, delete_response.text)
+        self.assertFalse(versioned_path.exists())
+        self.assertFalse(stored_path.exists())
+
+        deleted_document = self.client.get(
+            f"/api/v1/documents/{document_id}",
+            headers=headers,
+        )
+        self.assertEqual(deleted_document.status_code, 404, deleted_document.text)
+
+        document_audit_delete = self.client.get(
+            f"/api/v1/audit-logs/?entity_type=document&entity_id={document_id}&action=delete",
+            headers=self.accountant_headers(),
+        )
+        self.assertEqual(document_audit_delete.status_code, 200, document_audit_delete.text)
+        delete_audit_payload = document_audit_delete.json()["items"]
+        self.assertEqual(len(delete_audit_payload), 1)
+        self.assertEqual(delete_audit_payload[0]["before_data"]["document"]["id"], document_id)
 
         bad_link = self.client.post(
             "/api/v1/documents/upload",

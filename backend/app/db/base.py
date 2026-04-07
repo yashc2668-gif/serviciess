@@ -2,6 +2,7 @@
 
 from app.db.base_class import Base
 from app.models.audit_log import AuditLog
+from app.models.bar_bending_schedule import BarBendingSchedule
 from app.models.boq import BOQItem
 from app.models.company import Company
 from app.models.contract import Contract
@@ -50,6 +51,7 @@ from app.models.work_done import WorkDoneItem
 __all__ = [
     "Base",
     "AuditLog",
+    "BarBendingSchedule",
     "Role",
     "Company",
     "User",

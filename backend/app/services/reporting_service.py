@@ -495,6 +495,7 @@ def _contract_commercial_query(
         (Contract.revised_value > 0, (commercial_headroom_amount_expr * 100.0) / Contract.revised_value),
         else_=0.0,
     )
+    counterparty_name_expr = func.coalesce(Vendor.name, Contract.client_name, "Client contract")
 
     query = (
         db.query(
@@ -502,7 +503,7 @@ def _contract_commercial_query(
             Contract.project_id.label("project_id"),
             Company.name.label("company_name"),
             Project.name.label("project_name"),
-            Vendor.name.label("vendor_name"),
+            counterparty_name_expr.label("vendor_name"),
             Contract.contract_no.label("contract_no"),
             Contract.title.label("contract_title"),
             Contract.status.label("status"),
@@ -522,7 +523,7 @@ def _contract_commercial_query(
         )
         .join(Project, Project.id == Contract.project_id)
         .join(Company, Company.id == Project.company_id)
-        .join(Vendor, Vendor.id == Contract.vendor_id)
+        .outerjoin(Vendor, Vendor.id == Contract.vendor_id)
         .outerjoin(billed_summary, billed_summary.c.contract_id == Contract.id)
         .outerjoin(payment_summary, payment_summary.c.contract_id == Contract.id)
         .outerjoin(material_summary, material_summary.c.contract_id == Contract.id)
@@ -543,7 +544,7 @@ def _contract_commercial_query(
                 Contract.contract_no.ilike(search_term),
                 Contract.title.ilike(search_term),
                 Project.name.ilike(search_term),
-                Vendor.name.ilike(search_term),
+                counterparty_name_expr.ilike(search_term),
                 Company.name.ilike(search_term),
             )
         )
@@ -830,6 +831,7 @@ def _retention_tracking_query(
         ),
         else_="tracking",
     )
+    counterparty_name_expr = func.coalesce(Vendor.name, Contract.client_name, "Client contract")
 
     query = (
         db.query(
@@ -837,7 +839,7 @@ def _retention_tracking_query(
             Contract.project_id.label("project_id"),
             Company.name.label("company_name"),
             Project.name.label("project_name"),
-            Vendor.name.label("vendor_name"),
+            counterparty_name_expr.label("vendor_name"),
             Contract.contract_no.label("contract_no"),
             Contract.title.label("contract_title"),
             Contract.status.label("status"),
@@ -853,7 +855,7 @@ def _retention_tracking_query(
         )
         .join(Project, Project.id == Contract.project_id)
         .join(Company, Company.id == Project.company_id)
-        .join(Vendor, Vendor.id == Contract.vendor_id)
+        .outerjoin(Vendor, Vendor.id == Contract.vendor_id)
         .outerjoin(billed_summary, billed_summary.c.contract_id == Contract.id)
         .outerjoin(retention_summary, retention_summary.c.contract_id == Contract.id)
         .filter(Contract.is_deleted.is_(False), Project.is_deleted.is_(False))
@@ -867,7 +869,7 @@ def _retention_tracking_query(
                 Contract.contract_no.ilike(search_term),
                 Contract.title.ilike(search_term),
                 Project.name.ilike(search_term),
-                Vendor.name.ilike(search_term),
+                counterparty_name_expr.ilike(search_term),
                 Company.name.ilike(search_term),
             )
         )
@@ -875,7 +877,7 @@ def _retention_tracking_query(
     sort_options = {
         "contract_no": (Contract.contract_no, Contract.id),
         "project_name": (Project.name, Contract.id),
-        "vendor_name": (Vendor.name, Contract.id),
+        "vendor_name": (counterparty_name_expr, Contract.id),
         "retention_percentage": (Contract.retention_percentage, Contract.id),
         "contract_value": (Contract.revised_value, Contract.id),
         "billed_amount": (billed_amount_expr, Contract.id),
@@ -1256,7 +1258,7 @@ def get_cash_flow_forecast(
         .join(Contract, Contract.id == RABill.contract_id)
         .join(Project, Project.id == Contract.project_id)
         .join(Company, Company.id == Project.company_id)
-        .join(Vendor, Vendor.id == Contract.vendor_id)
+        .outerjoin(Vendor, Vendor.id == Contract.vendor_id)
         .filter(
             Contract.is_deleted.is_(False),
             Project.is_deleted.is_(False),
@@ -1279,7 +1281,7 @@ def get_cash_flow_forecast(
         .join(Contract, Contract.id == Payment.contract_id)
         .join(Project, Project.id == Contract.project_id)
         .join(Company, Company.id == Project.company_id)
-        .join(Vendor, Vendor.id == Contract.vendor_id)
+        .outerjoin(Vendor, Vendor.id == Contract.vendor_id)
         .filter(
             Contract.is_deleted.is_(False),
             Project.is_deleted.is_(False),
@@ -2379,12 +2381,12 @@ def _wbs_report_rows(
             Project.name.label("project_name"),
             Project.code.label("project_code"),
             Company.name.label("company_name"),
-            Vendor.name.label("vendor_name"),
+            func.coalesce(Vendor.name, Contract.client_name, "Client contract").label("vendor_name"),
         )
         .join(Contract, Contract.id == BOQItem.contract_id)
         .join(Project, Project.id == Contract.project_id)
         .join(Company, Company.id == Project.company_id)
-        .join(Vendor, Vendor.id == Contract.vendor_id)
+        .outerjoin(Vendor, Vendor.id == Contract.vendor_id)
         .outerjoin(wd_sub, wd_sub.c.boq_item_id == BOQItem.id)
         .outerjoin(billed_sub, billed_sub.c.boq_item_id == BOQItem.id)
     )

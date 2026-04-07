@@ -1,0 +1,45 @@
+- generic [ref=e2]:
+  - generic [ref=e6]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - img [ref=e12]:
+            - generic [ref=e14]: m
+          - generic [ref=e15]: Marco Construction ERP
+        - generic [ref=e16]:
+          - heading "Build a control room that feels alive, not another generic admin panel." [level=1] [ref=e17]
+          - paragraph [ref=e18]: "This starter is aligned to your live backend: auth, RBAC, dashboard, materials, labour, payments, audit visibility, and AI boundary controls."
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Backend-first
+          - paragraph [ref=e22]: Route guard and permission logic mirror backend intent.
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: Operational UX
+          - paragraph [ref=e25]: Tables, summaries, and approval surfaces built for scanning.
+        - generic [ref=e26]:
+          - paragraph [ref=e27]: Future-safe
+          - paragraph [ref=e28]: Typed API layer and shell foundation ready for next modules.
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Sign in
+        - generic [ref=e33]:
+          - heading "Open the command center." [level=2] [ref=e34]
+          - paragraph [ref=e35]: Connected to localhost:8000. Use a backend account to unlock the ERP workspace.
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - text: Work email
+          - textbox "Work email" [ref=e38]:
+            - /placeholder: site.lead@example.com
+        - generic [ref=e39]:
+          - text: Password
+          - textbox "Password" [ref=e40]:
+            - /placeholder: Minimum 8 characters
+        - button "Enter workspace" [ref=e41] [cursor=pointer]
+        - link "Forgot your password?" [ref=e43] [cursor=pointer]:
+          - /url: /forgot-password
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - img [ref=e46]
+          - text: Backend rule reminder
+        - text: Final access, workflow actions, and data safety are still enforced by the backend. The frontend is helping operators move faster without bypassing those controls.
+  - generic "Notifications"

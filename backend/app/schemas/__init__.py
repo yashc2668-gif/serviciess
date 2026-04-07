@@ -20,6 +20,7 @@ from app.schemas.contract import (  # noqa
     ContractUpdate,
 )
 from app.schemas.boq import BOQItemCreate, BOQItemUpdate, BOQItemOut  # noqa
+from app.schemas.bbs import BBSCreate, BBSOut, BBSUpdate  # noqa
 from app.schemas.measurement import (  # noqa
     MeasurementCreate,
     MeasurementItemCreate,

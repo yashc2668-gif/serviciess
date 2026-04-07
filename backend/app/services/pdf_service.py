@@ -12,6 +12,7 @@ from __future__ import annotations
 import io
 from datetime import date
 from decimal import Decimal
+from xml.sax.saxutils import escape
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -47,6 +48,19 @@ def _fmt_date(d: date | None) -> str:
     if d is None:
         return "—"
     return d.strftime("%d %b %Y")
+
+
+def _fmt_percent(value: float | Decimal | None) -> str:
+    if value is None:
+        return "â€”"
+    return f"{float(value):,.2f}%"
+
+
+def _safe_text(value: object | None) -> str:
+    if value is None:
+        return "â€”"
+    text = str(value).strip()
+    return escape(text or "â€”").replace("\n", "<br/>")
 
 
 def _build_styles() -> dict:
@@ -134,8 +148,8 @@ SUMMARY_STYLE = TableStyle([
 
 def _info_grid(rows: list[tuple[str, str]], col_widths: tuple = (45 * mm, 90 * mm)):
     """Creates a two-column label:value info grid."""
-    data = [[Paragraph(f"<b>{label}</b>", _build_styles()["normal"]),
-             Paragraph(value, _build_styles()["normal"])] for label, value in rows]
+    data = [[Paragraph(f"<b>{escape(label)}</b>", _build_styles()["normal"]),
+             Paragraph(_safe_text(value), _build_styles()["normal"])] for label, value in rows]
     t = Table(data, colWidths=col_widths)
     t.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -489,6 +503,166 @@ def generate_labour_bill_pdf(
         elements.append(Spacer(1, 4 * mm))
         elements.append(Paragraph("Remarks", styles["heading"]))
         elements.append(Paragraph(remarks, styles["normal"]))
+
+    doc.build(elements, onFirstPage=_footer, onLaterPages=_footer)
+    return buf.getvalue()
+
+
+def generate_contract_work_order_pdf(
+    work_order: object,
+    *,
+    contract: object,
+    project: object,
+    company: object | None,
+    vendor: object | None,
+) -> bytes:
+    """Generate a manually curated contract work order PDF."""
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=PAGE_MARGIN,
+        rightMargin=PAGE_MARGIN,
+        topMargin=PAGE_MARGIN,
+        bottomMargin=20 * mm,
+    )
+    styles = _build_styles()
+    elements: list = []
+
+    project_name = getattr(work_order, "project_name", None) or getattr(project, "name", None)
+    work_order_no = getattr(work_order, "work_order_no", None) or getattr(contract, "contract_no", None)
+    title = getattr(work_order, "title", None) or getattr(contract, "title", None)
+
+    elements.append(Paragraph("Work Order", styles["title"]))
+    elements.append(
+        Paragraph(
+            f"{_safe_text(work_order_no)} - {_fmt_date(getattr(work_order, 'work_order_date', None))}",
+            styles["subtitle"],
+        )
+    )
+
+    elements.append(
+        _info_grid(
+            [
+                ("Project", project_name or "â€”"),
+                ("Project Location", getattr(work_order, "project_location", None) or getattr(project, "location", None) or "â€”"),
+                ("Reference Contract", getattr(contract, "contract_no", None) or "â€”"),
+                ("Work Window", f"{_fmt_date(getattr(work_order, 'start_date', None))} to {_fmt_date(getattr(work_order, 'end_date', None))}"),
+                ("Retention", _fmt_percent(getattr(work_order, "retention_percentage", None))),
+            ]
+        )
+    )
+    elements.append(Spacer(1, 4 * mm))
+
+    issuer_rows = [
+        ("Issued By", getattr(work_order, "issuer_name", None) or getattr(company, "name", None) or "â€”"),
+        ("Address", getattr(work_order, "issuer_address", None) or "â€”"),
+        ("GST", getattr(work_order, "issuer_gst_number", None) or getattr(company, "gst_number", None) or "â€”"),
+        ("Contact", getattr(work_order, "issuer_contact", None) or getattr(company, "phone", None) or "â€”"),
+    ]
+    recipient_rows = [
+        (
+            getattr(work_order, "recipient_label", None) or ("Vendor" if vendor is not None else "Issued To"),
+            getattr(work_order, "recipient_name", None) or getattr(vendor, "name", None) or "â€”",
+        ),
+        ("Address", getattr(work_order, "recipient_address", None) or getattr(vendor, "address", None) or "â€”"),
+    ]
+
+    party_table = Table(
+        [
+            [
+                Paragraph("Issuer Details", styles["heading"]),
+                Paragraph("Recipient Details", styles["heading"]),
+            ],
+            [
+                _info_grid(issuer_rows, col_widths=(30 * mm, 55 * mm)),
+                _info_grid(recipient_rows, col_widths=(28 * mm, 57 * mm)),
+            ],
+        ],
+        colWidths=[85 * mm, 85 * mm],
+    )
+    party_table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
+    elements.append(party_table)
+
+    subject = getattr(work_order, "subject", None)
+    if subject:
+        elements.append(Spacer(1, 4 * mm))
+        elements.append(Paragraph("Subject", styles["heading"]))
+        elements.append(Paragraph(_safe_text(subject), styles["normal"]))
+
+    elements.append(Spacer(1, 4 * mm))
+    elements.append(Paragraph("Work Summary", styles["heading"]))
+    elements.append(
+        _info_grid(
+            [
+                ("Title", title or "â€”"),
+                ("Contract Type", (getattr(contract, "contract_type", "") or "").replace("_", " ").title() or "â€”"),
+                ("Original Value", _fmt_currency(getattr(work_order, "original_value", None))),
+                ("Revised Value", _fmt_currency(getattr(work_order, "revised_value", None))),
+            ]
+        )
+    )
+
+    scope_of_work = getattr(work_order, "scope_of_work", None) or getattr(contract, "scope_of_work", None)
+    if scope_of_work:
+        elements.append(Spacer(1, 4 * mm))
+        elements.append(Paragraph("Scope of Work", styles["heading"]))
+        elements.append(Paragraph(_safe_text(scope_of_work), styles["normal"]))
+
+    payment_terms = getattr(work_order, "payment_terms", None)
+    if payment_terms:
+        elements.append(Spacer(1, 4 * mm))
+        elements.append(Paragraph("Payment Terms", styles["heading"]))
+        elements.append(Paragraph(_safe_text(payment_terms), styles["normal"]))
+
+    special_conditions = getattr(work_order, "special_conditions", None)
+    if special_conditions:
+        elements.append(Spacer(1, 4 * mm))
+        elements.append(Paragraph("Special Conditions", styles["heading"]))
+        elements.append(Paragraph(_safe_text(special_conditions), styles["normal"]))
+
+    signatory_name = getattr(work_order, "signatory_name", None)
+    signatory_designation = getattr(work_order, "signatory_designation", None)
+    if signatory_name or signatory_designation:
+        elements.append(Spacer(1, 8 * mm))
+        signatory_table = Table(
+            [
+                ["", ""],
+                [
+                    Paragraph("<b>Authorised Signatory</b>", styles["normal"]),
+                    Paragraph(_safe_text(signatory_name), styles["normal"]),
+                ],
+                [
+                    Paragraph("<b>Designation</b>", styles["normal"]),
+                    Paragraph(_safe_text(signatory_designation), styles["normal"]),
+                ],
+            ],
+            colWidths=[45 * mm, 70 * mm],
+            hAlign="RIGHT",
+        )
+        signatory_table.setStyle(
+            TableStyle(
+                [
+                    ("LINEABOVE", (0, 0), (-1, 0), 0.8, LINE),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ]
+            )
+        )
+        elements.append(signatory_table)
 
     doc.build(elements, onFirstPage=_footer, onLaterPages=_footer)
     return buf.getvalue()

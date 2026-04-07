@@ -445,6 +445,51 @@ def update_document_metadata(
     return get_document_or_404(db, document.id)
 
 
+def delete_document(
+    db: Session,
+    document_id: int,
+    current_user: User,
+) -> None:
+    document = get_document_or_404(db, document_id)
+    before_data = _document_audit_payload(document)
+    file_paths = list(
+        dict.fromkeys(
+            version.file_path
+            for version in document.versions
+            if version.file_path
+        )
+    )
+    storage = get_storage_adapter()
+
+    log_audit_event(
+        db,
+        entity_type="document",
+        entity_id=document.id,
+        action="delete",
+        performed_by=current_user,
+        before_data=before_data,
+        remarks=document.title,
+    )
+    db.delete(document)
+    db.commit()
+
+    deleted_files = 0
+    for file_path in file_paths:
+        try:
+            storage.delete(file_path)
+            deleted_files += 1
+        except Exception:
+            continue
+
+    log_business_event(
+        "document.deleted",
+        document_id=document_id,
+        entity_type=document.entity_type,
+        entity_id=document.entity_id,
+        deleted_file_count=deleted_files,
+    )
+
+
 def open_document_download(
     db: Session,
     document_id: int,

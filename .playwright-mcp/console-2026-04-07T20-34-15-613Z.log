@@ -1,0 +1,160 @@
+[     668ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app/:0
+[    1635ms] [LOG] %c
+▲
+
+    ________   _ __ _          ____           __
+   /  _/ __/  (_) /( )_____   / __/___ ______/ /_
+   / // /_   / / __/// ___/  / /_/ __ `/ ___/ __/
+ _/ // __/  / / /_  (__  )  / __/ /_/ (__  ) /_
+/___/_/    /_/\__/ /____/  /_/  \__,_/____/\__/
+    _ __ _                         _    __                    __
+   (_) /( )_____   ____  ____     | |  / /__  _____________  / /
+  / / __/// ___/  / __ \/ __ \    | | / / _ \/ ___/ ___/ _ \/ /
+ / / /_  (__  )  / /_/ / / / /    | |/ /  __/ /  / /__/  __/ /
+/_/\__/ /____/   \____/_/ /_/     |___/\___/_/   \___/\___/_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/chunks/06zytmnluplv-.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:72
+[    2424ms] [WARNING] [GSI_LOGGER]: Your client application uses one of the Google One Tap prompt UI status methods that may stop functioning when FedCM becomes mandatory. Refer to the migration guide to update your code accordingly and opt-in to FedCM to test your changes. Learn more: https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#display_moment and https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#skipped_moment @ https://accounts.google.com/gsi/client:80
+[    2440ms] [ERROR] Not signed in with the identity provider. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[    2516ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[    2677ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/3-b4k7y-ur005.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:18
+[    2879ms] [ERROR] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token. @ https://vercel.com/_next/static/chunks/3qj0pdpitxi_i.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:2
+[    6847ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-2009568761%3A1775594062756971&client_id=258013614557-nema0dumfbottebi6to7aqi85qot9pvs.apps.googleusercontent.com&o2v=2&redirect_uri=https%3A%2F%2Fvercel.com%2Fapi%2Fregistration%2Fgoogle%2Fcallback&response_type=code&scope=openid+profile+email&service=lso&state=55c550745b4ff4468a8feb0048f2501013bdacf38ab9891c678f17e85f8dcb212b7ebbe62e6b54cc636c17ff9b3a035ccad3224144754cbb59df8310129f8cc42e47fb59e887ea5b32f36e024ef657dafae731ce159f2e8db8a18f03543e046b2da731778d5ccb8f6a9ce6c5a0ca946c2cf814c5c03fd3f1ac66cdd9238195b64ef93773ee4068c99861ed04abfa58bd9e3bc4b919806a8baa023071ba65daa4447da02f8d22c4e5d22bd5c613ec029bbb660a0b163b8dfb1e72481674397443ab39c3ee3f8cc09eb68d56f72343bd0c5bc130f3d1973286659e95e4a8ada9897cf292caa044c66e1e215a40e0620bbf23c7943143d4a01c898a8105fc6d767373dd892d4e34b3e3c388612dda758ae169d2187ad30e55a2d90c6040295f8217025b4ed9915a5f5207f95864fd8fad471a9d9562466973eaa444f9e63768b3677994daef1d8ee9ec374f508abdb7e1b3e9e91b43dd1fbf0fb907511874451fd3a11a5cfdece809174313dcae0107d49ad847b36f29dbb06221c5216384eefd462fa6f5c3cb71f8209f28e56ff847828041ffa156b2a116bab6466fd9a95d81e932b48e476d2bc4bd6672b455e9b6a828c838b36752f425fa8143c363c587d4c508271751341f1c647d6addfd928af409bdcf043c5b230336e5234bc6cfe0a17585dc1b9393d0b21624b43dc976033c755ee65a627ff1173444cd22f5f082eec755a7f5aca85d75c058d59fb1230d559cc87aa4c91f6febc150a40aa27be5598d1bfea81f392ea5b2cf818fbd2cb703a734c6906d9784f44a718661c8b8790a846128f581996de21b1b3f2c3f62c96ef5d565b250d5de420d34b9953ed6703334df12dfc77da34fd7040d57b0932b8113f24ba8a31dc6a03e43c1f35336272fcdfd1ee38f70e33ffe002b0a5b69849190089eb4f806281a0782209daa275fab23dbfa55da9be207e20c22d6c0ed7abb8c60952af9962feddb2910dbb49ebf80502fc193848d876a55577a264dea01c6a609506f779d348581ef40dc812945a04310d9d03929742928064b28b69eefd632cb33b12bdec53d8d22da7204729c1edd646fb1f18809aef08879&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOonkJ3o2zq_dvg99eIPobhAVfnTP-5-wxl8GdqTy9eHnnXNdXvstDsMDVgB1QVrwjtZnppfHItS1KLaWguYaJutPzxUqjUICiyjkutaFvudDMu7qxss9JvM__hstQSLjN94bE9JdAkZuUwpbxvLPKYGdFwcj3ubHBZliBZinLPy_DFmZ28tuvHKoBhz1K6Y1_qcMmS4K3HFChavuuaCrgi7ANENC2H8DP88kFyIOKDKPjG-Iz-NxJG5fzV517z7m3zQOX_fKDR8zFEEHtvA0ItaMUge_AU-wM_oW8pOvrVyCR-pHYFDQIQcMC4VXN_zYg5wb6v6eyIL7H5QfKuScYnsyUZYKSo34-E4BQuTH3mAxNnZlZlGcLK7-mCvIleF6eAK0Ra9Vvhtm-ZjneUmDbBB3J1wBxPu_T1TRdeTUWdXwkamOSGelzOrSVnd_e3Sr2aw5Rr_BK4nNem-SnTV7UgSmYbMg%26flowName%3DGeneralOAuthFlow%26as%3DS-2009568761%253A1775594062756971%26client_id%3D258013614557-nema0dumfbottebi6to7aqi85qot9pvs.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fvercel.com&rart=ANgoxceX8S6_V3p0hIUYQEn3XzVp2HozYAQVier0yGqOIYmCvJ0OWkHUlUHwYPMdx9Szk0Lk7mzrDYwQsEad7pNULi0wLYrmibiptM8LEMxawogfnQXyzfA:0
+[    6864ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[    6864ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[   11672ms] [LOG] %c
+▲
+
+    ________   _ __ _          ____           __
+   /  _/ __/  (_) /( )_____   / __/___ ______/ /_
+   / // /_   / / __/// ___/  / /_/ __ `/ ___/ __/
+ _/ // __/  / / /_  (__  )  / __/ /_/ (__  ) /_
+/___/_/    /_/\__/ /____/  /_/  \__,_/____/\__/
+    _ __ _                         _    __                    __
+   (_) /( )_____   ____  ____     | |  / /__  _____________  / /
+  / / __/// ___/  / __ \/ __ \    | | / / _ \/ ___/ ___/ _ \/ /
+ / / /_  (__  )  / /_/ / / / /    | |/ /  __/ /  / /__/  __/ /
+/_/\__/ /____/   \____/_/ /_/     |___/\___/_/   \___/\___/_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/chunks/06zytmnluplv-.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:72
+[   12391ms] [WARNING] [GSI_LOGGER]: Your client application uses one of the Google One Tap prompt UI status methods that may stop functioning when FedCM becomes mandatory. Refer to the migration guide to update your code accordingly and opt-in to FedCM to test your changes. Learn more: https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#display_moment and https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#skipped_moment @ https://accounts.google.com/gsi/client:80
+[   12416ms] [ERROR] Not signed in with the identity provider. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   12552ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   12827ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/3-b4k7y-ur005.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:18
+[   14197ms] [ERROR] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token. @ https://vercel.com/_next/static/chunks/3qj0pdpitxi_i.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:2
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/media/ebay-dark.34mho2a18qqlt.svg?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/media/stripe-light.2l_1jctpe6k_4.svg?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/chunks/3a8xz0x-t56_1.css?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/media/adobe-light.406_7oryl71va.svg?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/media/ebay-light.3ft_ki8203ov0.svg?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   17330ms] [WARNING] The resource https://vercel.com/_next/static/media/stripe-dark.16ozjth2vgb_3.svg?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   19707ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-1992807522%3A1775594075693318&client_id=258013614557-nema0dumfbottebi6to7aqi85qot9pvs.apps.googleusercontent.com&o2v=2&redirect_uri=https%3A%2F%2Fvercel.com%2Fapi%2Fregistration%2Fgoogle%2Fcallback&response_type=code&scope=openid+profile+email&service=lso&state=246e1575257bbb4fbfc658121a9e12c0da698554db156ab38455773809a0b805d672090d564ea24794886ee62228d1874e929f2f66dcadd5bac22388c58da1f683fd9df6ce68cbb97d1c415de0289ab3f840102a510f8345cd95987429fb43e0bc23c1a87de45797df02c8bd704e0087f2a2523f7411710ebb50c2fbbd7d16571052451e2915de6cbe67b423237ee0121de11a01a3a19113c87ddbf28dbbabef8a882719c3e5b3d7e4b232ff8e7297da2b2295b623826f3cdde92d7e937a65a05190cad407607c430d74e2118d19085948aec5d3812262ed9d14a2fc580138372340b74e9fe2349cd0b47206842061201bc954441adb9ce06bf16c38044d39d048e8346ae79acf8275ab999d0729062e9256533ced7c970ebc224c79612c5ad6774f1601a8a4ee331108e5e01780bf4bfba04aca2912a8fffd39cff8f2dc31d58cb2f39ab23de19075b50948839031bfbc58d0f9d9ab9e5d6b303809fb7547ee5694fb058486b4418a0661471338a2259ba84c2ddb9bd590e77e115e1e10ae7110ce1c5e28475e03ceebf12eceb309b29e8a54bfd2a6120408a444cb09d6d630a2f995d3a65351282fe136c0f5e765fcc8a42e3759c8c0db4302e05b8c86615d00acd590df18730baaf955d082d53006a26bddfd6488667cbc86de9edf5761475d60e6c16169b9c28beddd43c61e4442948ec6fde9df61b153372a541edccdab86097631912ce1c89f92d96e54c80c577c8a741c0624c45c451638d657b4dbb43c237dce18f03e6976afd0735ff97b678dcb93bc39c671ff859cf87255a9b817ee9e4deb68bf01bd585646738a159fb1fdfc81f7b41162c539a1579f985aad930cf9bcc9ba42d5d314f7068c1a731d1a038ba50415c272e1362f8a0fca22ad61b23d353240d6a47fcf8a8161451ad50676889f33bebb76e80db4b1a3edafad3d1d82d187fdba61e5d8c743ab3b9429b8cefa817b62ea53cca025425d11dc9cb99d4aba4df94a3ddd9d0c809f065a660fb6c85ecb0515fdf82178b5081d6ce59a4e7d56b3d501289a4185ce3b2bfc7bc1be41d72b8c6538633baa360d634336c24b54448ed903e078bfce&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOhrTZfO1SPuOYaJ8cMADfBQ7_gmRvMlOxbRITC8PVTrqdc-efazkuwplVeeAbYgg0GblDgwsgbn_ZUIO8-xy5kAVzPncbF3P6CHsNPrMkTk0xW8is-tCVC8kpcNG3VzN_biGuXOOVL7dCNa6CyRzZKUho_0sW4UafiqDbrarTkwkFQzRSStA_PHaNpUA3QrBoEQnFHBEsxmCTLLY5J83kL3eeBLzOQyI9oiYPNiFfnN1F6-PtPR0gQ19kEYihtkgxGR1CG8sbT8N164xxW_c-8fKhiFs6ii_NWNEQNHmXD6h1MyEStW_R5Uz2ntpVQ-utpNNu82KZO6MrE_L4EkA05TPo20wROlZ4_nUGwAWLzSZDiGAGV7b1jmqipPWta4RfvAQiKt9ZpMA5TLWpiQ7RDnUceTur4EOL51opb4ZIN1TCKy4iMpWnK1Fo9z2ZqC9rAR2O-Jz5GpJYgsfiMBNaHcMywBg%26flowName%3DGeneralOAuthFlow%26as%3DS-1992807522%253A1775594075693318%26client_id%3D258013614557-nema0dumfbottebi6to7aqi85qot9pvs.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fvercel.com&rart=ANgoxcei44rOB6fVwTF9SKtserY4YhZYa-KBAeBtU5-1wr8OHlVsW-E3e6OzGOAv1FjPKn5nDodc1Tlf9WofPG8GeCOhUmiK58hXQ26bDSGWw1Ni6YVlCPA:0
+[   19719ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[   19720ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[   21778ms] [LOG] %c
+▲
+
+    ____                               _ __
+   / __ \________  ____ _____ ___     (_) /_
+  / / / / ___/ _ \/ __ `/ __ `__ \   / / __/
+ / /_/ / /  /  __/ /_/ / / / / / /  / / /__
+/_____/_/   \___/\__,_/_/ /_/ /_/  /_/\__( )
+   _____ __    _          _ __           |/
+  / ___// /_  (_)___     (_) /_
+  \__ \/ __ \/ / __ \   / / __/
+ ___/ / / / / / /_/ /  / / /_
+/____/_/ /_/_/ .___/  /_/\__/
+            /_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/chunks/06zytmnluplv-.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:72
+[   22039ms] [WARNING] [GSI_LOGGER]: Your client application uses one of the Google One Tap prompt UI status methods that may stop functioning when FedCM becomes mandatory. Refer to the migration guide to update your code accordingly and opt-in to FedCM to test your changes. Learn more: https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#display_moment and https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#skipped_moment @ https://accounts.google.com/gsi/client:80
+[   22058ms] [ERROR] Not signed in with the identity provider. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   22253ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   22496ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/3-b4k7y-ur005.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:18
+[   23092ms] [ERROR] [GSI_LOGGER]: FedCM get() rejects with AbortError: signal is aborted without reason @ https://vercel.com/_next/static/chunks/3qj0pdpitxi_i.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:2
+[   28664ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S187645942%3A1775594084704843&client_id=1078992815106-brpsupgvhheqg35tupphbh0qk9c32nq8.apps.googleusercontent.com&code_challenge=_b3vFDAfJ0cQvh7978Wn2p-Rco16I91OXIjD50GSRCQ&code_challenge_method=S256&nonce=e9c181074f10e9bad06c300a34820f9e&o2v=2&prompt=select_account&redirect_uri=https%3A%2F%2Fgithub.com%2Fsessions%2Fsocial%2Fgoogle%2Fcallback&response_type=code&scope=openid+email+profile&service=lso&state=514f38bb385453107967f7cdcd6f70ab&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAMFQAHZxozCYKxxGMuIsmXRO2l3nUueGdanReEhU7YjlP1Lukz47bI9UBvV8Hxe4gbVTeNjqo6A7Y0co2bR_mSDmt0Ps2sFwcgbTQw5caWjxZSvkgtK0kGdg1_iZVolTYKT3uMB9PgKXXx6rNw9C94jZhDLtz4XexZKyyoRt3qsbGL3JpcnoeayR7v4XhjAbCYarcXeiis1jD2K2oheosmnUWCtDr1hQNJaIF7JpSuwmcmwcgDt04QHibxPQoYWLN-fSOvn9El1p1oQbOQQS0Ypo9lv0UwjJ87hhHwP5o4S3FeK4yIYsKtx1C404ejl44AoLj7I79QvZnEWwKlAzHDxKIO9MJWn7rltsv0m23vwcUU2q7pKe3Xtl16KvGI7iomtlKE2Hl-wL5Cw68cVgAcVGWSHdWNZThcl-uWn8HCasLrx43_nGJVbp4pcTR7QbG5aBD5CnPgMK16kIYNF1-0gTs-FYQ%26flowName%3DGeneralOAuthFlow%26as%3DS187645942%253A1775594084704843%26client_id%3D1078992815106-brpsupgvhheqg35tupphbh0qk9c32nq8.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fgithub.com&rart=ANgoxcfn4QRYf6Cry4VBHVNt8h-vN9CZPA1ZbpvhEJ8xnj_yIiww1HkddRXS5aYxlVkyuNtpCXRcerBgOArYifCOlI-G5OBVU73TKsWQjq1hZwQxpXA_h3Y:0
+[   28676ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[   28676ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.88iQ3Wo1jFg.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlEXcMdpB6Lc1qQwypp9z8LLD15G0w/dti=1/m=_b,_tp:467
+[   62496ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,accountchooserview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   62497ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,accountchooserview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   75356ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,accountchooserview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   75356ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,accountchooserview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   76964ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S187645942%3A1775594084704843&client_id=1078992815106-brpsupgvhheqg35tupphbh0qk9c32nq8.apps.googleusercontent.com&code_challenge=_b3vFDAfJ0cQvh7978Wn2p-Rco16I91OXIjD50GSRCQ&code_challenge_method=S256&nonce=e9c181074f10e9bad06c300a34820f9e&o2v=2&prompt=select_account&redirect_uri=https%3A%2F%2Fgithub.com%2Fsessions%2Fsocial%2Fgoogle%2Fcallback&response_type=code&scope=openid+email+profile&service=lso&state=514f38bb385453107967f7cdcd6f70ab&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAMFQAHZxozCYKxxGMuIsmXRO2l3nUueGdanReEhU7YjlP1Lukz47bI9UBvV8Hxe4gbVTeNjqo6A7Y0co2bR_mSDmt0Ps2sFwcgbTQw5caWjxZSvkgtK0kGdg1_iZVolTYKT3uMB9PgKXXx6rNw9C94jZhDLtz4XexZKyyoRt3qsbGL3JpcnoeayR7v4XhjAbCYarcXeiis1jD2K2oheosmnUWCtDr1hQNJaIF7JpSuwmcmwcgDt04QHibxPQoYWLN-fSOvn9El1p1oQbOQQS0Ypo9lv0UwjJ87hhHwP5o4S3FeK4yIYsKtx1C404ejl44AoLj7I79QvZnEWwKlAzHDxKIO9MJWn7rltsv0m23vwcUU2q7pKe3Xtl16KvGI7iomtlKE2Hl-wL5Cw68cVgAcVGWSHdWNZThcl-uWn8HCasLrx43_nGJVbp4pcTR7QbG5aBD5CnPgMK16kIYNF1-0gTs-FYQ%26flowName%3DGeneralOAuthFlow%26as%3DS187645942%253A1775594084704843%26client_id%3D1078992815106-brpsupgvhheqg35tupphbh0qk9c32nq8.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2Fgithub.com&rart=ANgoxcfn4QRYf6Cry4VBHVNt8h-vN9CZPA1ZbpvhEJ8xnj_yIiww1HkddRXS5aYxlVkyuNtpCXRcerBgOArYifCOlI-G5OBVU73TKsWQjq1hZwQxpXA_h3Y:0
+[   76972ms] [LOG] %c%s color: red; background: yellow; font-size: 24px; WARNING! @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   76972ms] [LOG] %c%s font-size: 18px; Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.
+Do not enter or paste code that you do not understand. @ https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en.nh9jLkWB7so.es5.O/am=Kf8GAABCEUgGwP__HzIJIACCaOB6FoAmEBkAAAAAAAAAALBAAIA0Ag/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlG9NdhGobfzyLerfgsXr0GkK3lpKQ/dti=1/m=_b,_tp:467
+[   84343ms] [LOG] %c
+▲
+
+    ____                               _ __
+   / __ \________  ____ _____ ___     (_) /_
+  / / / / ___/ _ \/ __ `/ __ `__ \   / / __/
+ / /_/ / /  /  __/ /_/ / / / / / /  / / /__
+/_____/_/   \___/\__,_/_/ /_/ /_/  /_/\__( )
+   _____ __    _          _ __           |/
+  / ___// /_  (_)___     (_) /_
+  \__ \/ __ \/ / __ \   / / __/
+ ___/ / / / / / /_/ /  / / /_
+/____/_/ /_/_/ .___/  /_/\__/
+            /_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/chunks/06zytmnluplv-.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:72
+[   84634ms] [WARNING] [GSI_LOGGER]: Your client application uses one of the Google One Tap prompt UI status methods that may stop functioning when FedCM becomes mandatory. Refer to the migration guide to update your code accordingly and opt-in to FedCM to test your changes. Learn more: https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#display_moment and https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#skipped_moment @ https://accounts.google.com/gsi/client:80
+[   84839ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   85047ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/3-b4k7y-ur005.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:18
+[   86155ms] [ERROR] The request has been aborted. @ https://vercel.com/login?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Fm2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app%252F%26nonce%3Dad1efc7adf884851e05a252367a925f9eaeb65e7a79a3ea15c2d7b921949f6a7:0
+[   86156ms] [ERROR] [GSI_LOGGER]: FedCM get() rejects with AbortError: signal is aborted without reason @ https://vercel.com/_next/static/chunks/3qj0pdpitxi_i.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:2
+[   86229ms] [ERROR] Failed to load resource: the server responded with a status of 429 () @ https://o205439.ingest.sentry.io/api/1323670/envelope/?sentry_key=d00780d432ac4ccf882f60dd02062e14&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.111.0:0
+[   87969ms] [LOG] %c
+▲
+
+  ________            ___    ____   ________                __
+ /_  __/ /_  ___     /   |  /  _/  / ____/ /___  __  ______/ /
+  / / / __ \/ _ \   / /| |  / /   / /   / / __ \/ / / / __  /
+ / / / / / /  __/  / ___ |_/ /   / /___/ / /_/ / /_/ / /_/ /
+/_/ /_/ /_/\___/  /_/  |_/___/   \____/_/\____/\__,_/\__,_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/chunks/1-of5y00ivxjz.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:72
+[   88188ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/chunks/2339gbx4wc1r3.js?dpl=dpl_2EPR6y8oCEHXNCtmoeL7nXTPjY7L:18
+[   88513ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   92846ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://m2n-frontend-git-main-yashs-projects-8e52d41e.vercel.app/login:0
